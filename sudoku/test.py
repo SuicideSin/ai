@@ -4,7 +4,6 @@ aGroups = []
 for i in range(0, 9):
     aGroups.append([])
 
-
 def bruteForce(puzzle):
 
     if not validateSudoku(puzzle):
