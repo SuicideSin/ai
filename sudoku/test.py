@@ -1,21 +1,37 @@
 import sys, time, pickle, queue
 
-aGroups = []
-for i in range(0, 9):
-    aGroups.append([])
+allGroups = [ [] for i in range(9)]
 
-def bruteForce(puzzle):
+for i in range(0, 81):
+    c = i%9
+    if allGroups[c] == None:
+        allGroups[c] = []
+    allGroups[c].append(i)
 
-    if not validateSudoku(puzzle):
-        return ""
-    pos = puzzle.find('.')
-    if pos < 0:
-        return puzzle
-    for char in "123456789":
-        bf = bruteForce(puzzle[:pos] + char + puzzle[pos+1:])
-        if bf != "":
-            return bf
-    return ""
+allSyms = set(i for i in range(1, 10))
+
+cellNeighbors = [ set() for i in range(0, 81) ]
+for i in range(0, 81):
+    for j in range(1, 9):
+        cellNeighbors[i].add(i+j*9)
+
+def findPossible(puzzle):
+    dic = {}
+    for i in range(0, 81):
+        dic[i] = allSyms - {puzzle[ps] for ps in cellNeighbors[pos] if puzzle[ps] != '.'}
+
+# def bruteForce(puzzle):
+#
+#     if not validate(puzzle):
+#         return ""
+#     pos = puzzle.find('.')
+#     if pos < 0:
+#         return puzzle
+#     for char in "123456789":
+#         bf = bruteForce(puzzle[:pos] + char + puzzle[pos+1:])
+#         if bf != "":
+#             return bf
+#     return ""
 
 
 def showBoard(puzzle):
@@ -55,23 +71,18 @@ def showBoard(puzzle):
         i += 1
     print("```````````````````")
 
-def toArray(puzzle):
-    for i in range(0, 81):
-        c = i%9
-        if aGroups[c] == None:
-            aGroups[c] = []
-        aGroups[c].append(i)
 
 
-def validate(puzzle):
-    global aGroups
-    for groupToCheck in aGroups:
-        alreadyThere = set()
-        for pos in groupToCheck:
-            if puzzle[pos] in alreadyThere:
-                return False
-            else:
-                alreadyThere.add(puzzle[pos])
+
+# def validate(puzzle):
+#     global aGroups
+#     for groupToCheck in aGroups:
+#         alreadyThere = set()
+#         for pos in groupToCheck:
+#             if puzzle[pos] in alreadyThere:
+#                 return False
+#             else:
+#                 alreadyThere.add(puzzle[pos])
 
 
 
@@ -93,7 +104,7 @@ if len(sys.argv) == 2:
     puzzle = sudoku[i]
     showBoard(puzzle)
     start = time.clock()
-    puzzle = bruteForce(puzzle)
+    #puzzle = bruteForce(puzzle)
 
     #print("Puzzle {}".format(count))
 
@@ -106,84 +117,9 @@ if len(sys.argv) == 2:
     print()
     #print(puzzle)
     print("\n")
-    toArray(puzzle)
-    print(aGroups)
-
-file = open("test.txt", 'w')
-
-if len(sys.argv) == 1:
-    for i in sudoku:
-        count = i+1
-        puzzle = sudoku[i]
-
-        start = time.clock()
-        puzzle = bruteForce(puzzle)
-
-        #print("Puzzle {}".format(count))
-        #showBoard(puzzle)
-        #print(puzzle)
-        delta = time.clock() - start
-        if(delta >= 60):
-            print("Puzzle {} completed in {} minutes and {} seconds.".format(count, int(delta/60), delta%60))
-        else:
-            print("Puzzle {} completed in {} seconds.".format(count, delta))
-        print(puzzle)
-        print("\n")
-        toArray(puzzle)
-        print(aGroups)
-
-        #file.write("Puzzle " + str(count) + "\n")
-        #file.write(stringBoard(puzzle))
-        if(delta >= 60):
-            file.write("Puzzle {} completed in {} minutes and {} seconds.\n".format(count, int(delta/60), delta%60))
-        else:
-            file.write("Puzzle {} completed in {} seconds.\n".format(count, delta))
-        file.write(puzzle)
-        file.write("\n\n")
-
-if len(sys.argv) == 3:
-    if int(sys.argv[1]) == int(sys.argv[2]):
-        count = int(sys.argv[1])
-        i = count - 1
-        print(sudoku[i])
-
-        puzzle = sudoku[i]
-        showBoard(puzzle)
-        start = time.clock()
-        puzzle = bruteForce(puzzle)
-
-        #print("Puzzle {}".format(count))
-
-        showBoard(puzzle)
-        delta = time.clock() - start
-        if(delta >= 60):
-            print("Puzzle {} completed in {} minutes and {} seconds.".format(count, int(delta/60), delta%60))
-        else:
-            print("Puzzle {} completed in {} seconds.".format(count, delta))
-        print()
-        #print(puzzle)
-        print("\n")
-    else:
-        for count in range(int(sys.argv[1]), int(sys.argv[2])+1):
-            i = count - 1
-            puzzle = sudoku[i]
-
-            start = time.clock()
-            puzzle = bruteForce(puzzle)
-
-            #print("Puzzle {}".format(count))
-            #showBoard(puzzle)
-            #print(puzzle)
-            delta = time.clock() - start
-            if(delta >= 60):
-                print("Puzzle {} completed in {} minutes and {} seconds.".format(count, int(delta/60), delta%60))
-            else:
-                print("Puzzle {} completed in {} seconds.".format(count, delta))
-            print(puzzle)
-            print("\n")
-
-
-
+    print(allGroups)
+    print(allSyms)
+    print(cellNeighbors[1])
 
 
 

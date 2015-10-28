@@ -85,11 +85,11 @@ ASSIGNMENT for 11/3/15:
 ''' 1. create global set of all symbols only needs to be computed once'''
     allSyms = {i for i in range(9)}
 
-''' 2. Create a list called aNeighbors, which is a list where the index is the position of a cell and the value is a set of the positions of all the neighbors of that cell (20 neighbors per cell) (maybe use aGroups to compute it). only needs to be computed once '''
-    aNeighbors[1] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 27, 36, 45, 56, 72, 10, 11, 19, 20}
+''' 2. Create a list called cellNeighbors, which is a list where the index is the position of a cell and the value is a set of the positions of all the neighbors of that cell (20 neighbors per cell) (maybe use aGroups to compute it). only needs to be computed once '''
+    cellNeighbors[1] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 27, 36, 45, 56, 72, 10, 11, 19, 20}
 
 ''' 3. Create findPossible(puzzle), which is a function that returns a dictionarywhere the keys are the positions of the cells in puzzle that are unset, and the values of set of symbols that could fill that cell. must be computed for every puzzle'''
-    allSyms - {puzzle[ps] for ps in aNeighbors[pos] if puzzle[ps] != '.'}
+    allSyms - {puzzle[ps] for ps in cellNeighbors[pos] if puzzle[ps] != '.'}
 
 ''' end '''
 
