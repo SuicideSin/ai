@@ -104,10 +104,16 @@ aList = [ i for i in range(100) if i % 2 == 0 ]
 
 
 
+'''
+important array stuff
+'''
 
+foo = [1,2,3]
+bar = foo[:] '''COPIES THE LIST'''
+bar = foo '''POINTS TO THE LIST, changes to bar will affect foo'''
 
-
-
+mySet = {1,2,3,4}
+myCopiedSet = mySet + set()
 
 
 

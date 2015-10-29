@@ -6,6 +6,7 @@ allGroups = list[0]
 allSyms = set(str(i) for i in range(1, 10))
 cellNeighbors = list[1]
 possible = {}
+guesses = 0
 
 def findPossible(puzzle):
     dic = {}
@@ -15,7 +16,8 @@ def findPossible(puzzle):
 
 def bruteForce(puzzle):
 
-    global possible
+    global possible, guesses
+    guesses += 1
 
     if not validate(puzzle):
         return ""
@@ -108,11 +110,13 @@ if len(sys.argv) == 2:
         print("Puzzle {} completed in {} seconds.".format(count, delta))
     print()
     #print(solved)
-
+    print("{} guesses.".format(guesses))
     print("\n")
 
 if len(sys.argv) == 1:
+    total = 0
     for i in sudoku:
+        guesses = 0
         count = i+1
         puzzle = sudoku[i]
 
@@ -130,10 +134,15 @@ if len(sys.argv) == 1:
             print("Puzzle {} completed in {} seconds.".format(count, delta))
         print(puzzle)
         print(solved)
+        total += delta
+        print("Total time elapsed: {} seconds".format(total))
+        print("{} guesses.".format(guesses))
         print("\n")
 
 if len(sys.argv) == 3:
+    total = 0
     for i in range(int(sys.argv[1]), int(sys.argv[2])+1):
+        guesses = 0
         count = i
         puzzle = sudoku[i-1]
 
@@ -149,6 +158,9 @@ if len(sys.argv) == 3:
             print("Puzzle {} completed in {} seconds.".format(count, delta))
         print(puzzle)
         print(solved)
+        total += delta
+        print("Total time elapsed: {} seconds".format(total))
+        print("{} guesses.".format(guesses))
         print("\n")
 
 
