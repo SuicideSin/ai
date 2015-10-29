@@ -24,13 +24,6 @@ def bruteForce(puzzle):
     pos = puzzle.find('.')
     if pos < 0:
         return puzzle
-
-    min = float("inf")
-    for i in possible:
-        if len(possible[i]) < min and puzzle[i]==".":
-                min = len(possible[i])
-                pos = i
-
     for char in possible[pos]:
         bf = bruteForce(puzzle[:pos] + char + puzzle[pos+1:])
         if bf != "":
@@ -140,6 +133,12 @@ if len(sys.argv) == 1:
         print(puzzle)
         print(solved)
         total += delta
+
+        if count == 51:
+            if len(sys.argv) != 2:
+                print("\nTotal time elapsed: {} seconds".format(total))
+            print("{} guesses.".format(guesses))
+
         print("\n")
 
 if len(sys.argv) == 3:
