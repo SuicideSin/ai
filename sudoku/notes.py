@@ -37,7 +37,7 @@ def bruteForce(puzzle):
     - two inputs
         solve range of puzzles
 
-        if two ipnuts are equal:
+        if first and last ipnuts are equal:
             print the starting puzzle, starting board, and ending board
 '''
 

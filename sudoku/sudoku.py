@@ -1,43 +1,11 @@
 import sys, time, pickle, queue
 
-allGroups = [ [] for i in range(9)]
+list = pickle.load( open( 'sets.pkl' , 'rb' ) )
+
+allGroups = list[0]
 allSyms = set(str(i) for i in range(1, 10))
-cellNeighbors = [ set() for i in range(0, 81) ]
+cellNeighbors = list[1]
 possible = {}
-
-temp = []
-boxes = {}
-for i in range(0, 81):
-    c = i%9
-    if allGroups[c] == None:
-        allGroups[c] = []
-    allGroups[c].append(i)
-
-    if i%9 == 0 and i != 0:
-        allGroups.append(temp)
-        temp = []
-    temp.append(i)
-    if i == 80:
-        allGroups.append(temp)
-
-    r = int(i/9)
-    c = i%9
-    rsec = int(r/3)
-    csec = int(c/3)
-    b = "".join([str(rsec), str(csec)])
-    if b not in boxes:
-        boxes[b] = []
-    boxes[b].append(i)
-for box in boxes:
-    allGroups.append(boxes[box])
-
-for i in range(0, 81):
-    cellNeighbors[i] = {i}
-    for group in allGroups:
-        if i in group:
-            temp = set(group)
-            cellNeighbors[i] = cellNeighbors[i] | temp
-            cellNeighbors[i].remove(i)
 
 def findPossible(puzzle):
     dic = {}
@@ -160,7 +128,26 @@ if len(sys.argv) == 1:
             print("Puzzle {} completed in {} minutes and {} seconds.".format(count, int(delta/60), delta%60))
         else:
             print("Puzzle {} completed in {} seconds.".format(count, delta))
-            print(puzzle)
+        print(puzzle)
+        print(solved)
+        print("\n")
+
+if len(sys.argv) == 3:
+    for i in range(int(sys.argv[1]), int(sys.argv[2])+1):
+        count = i
+        puzzle = sudoku[i-1]
+
+        start = time.clock()
+        possible = findPossible(puzzle)
+        solved = bruteForce(puzzle)
+
+
+        delta = time.clock() - start
+        if(delta >= 60):
+            print("Puzzle {} completed in {} minutes and {} seconds.".format(count, int(delta/60), delta%60))
+        else:
+            print("Puzzle {} completed in {} seconds.".format(count, delta))
+        print(puzzle)
         print(solved)
         print("\n")
 
