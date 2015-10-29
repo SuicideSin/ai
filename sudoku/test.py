@@ -1,37 +1,61 @@
 import sys, time, pickle, queue
 
 allGroups = [ [] for i in range(9)]
+allSyms = set(i for i in range(1, 10))
+cellNeighbors = [ set() for i in range(0, 81) ]
+dic = {}
 
+temp = []
+boxes = {}
 for i in range(0, 81):
     c = i%9
     if allGroups[c] == None:
         allGroups[c] = []
     allGroups[c].append(i)
 
-allSyms = set(i for i in range(1, 10))
+    if i%9 == 0 and i != 0:
+        allGroups.append(temp)
+        temp = []
+    temp.append(i)
+    if i == 80:
+        allGroups.append(temp)
 
-cellNeighbors = [ set() for i in range(0, 81) ]
+    r = int(i/9)
+    c = i%9
+    rsec = int(r/3)
+    csec = int(c/3)
+    b = "".join([str(rsec), str(csec)])
+    if b not in boxes:
+        boxes[b] = []
+    boxes[b].append(i)
+for box in boxes:
+    allGroups.append(boxes[box])
+
 for i in range(0, 81):
-    for j in range(1, 9):
-        cellNeighbors[i].add(i+j*9)
+    cellNeighbors[i] = {i}
+    for group in allGroups:
+        if i in group:
+            temp = set(group)
+            cellNeighbors[i] = cellNeighbors[i] | temp
+            cellNeighbors[i].remove(i)
 
 def findPossible(puzzle):
     dic = {}
     for i in range(0, 81):
-        dic[i] = allSyms - {puzzle[ps] for ps in cellNeighbors[pos] if puzzle[ps] != '.'}
+        dic[i] = allSyms - {puzzle[ps] for ps in cellNeighbors if puzzle[ps] != '.'}
 
-# def bruteForce(puzzle):
-#
-#     if not validate(puzzle):
-#         return ""
-#     pos = puzzle.find('.')
-#     if pos < 0:
-#         return puzzle
-#     for char in "123456789":
-#         bf = bruteForce(puzzle[:pos] + char + puzzle[pos+1:])
-#         if bf != "":
-#             return bf
-#     return ""
+def bruteForce(puzzle):
+
+    if not validate(puzzle):
+        return ""
+    pos = puzzle.find('.')
+    if pos < 0:
+        return puzzle
+    for char in "123456789":
+        bf = bruteForce(puzzle[:pos] + char + puzzle[pos+1:])
+        if bf != "":
+            return bf
+    return ""
 
 
 def showBoard(puzzle):
@@ -71,20 +95,57 @@ def showBoard(puzzle):
         i += 1
     print("```````````````````")
 
+def numBoard():
+    i = 1
+    x = 0
+    c = 0
+    n = 0
+    print(",,,,,,,,,,,,,,,,,,,,,,,,,,,,")
+    while n < 81:
+        r = int(i/9)
+        c += 1
+        if c == 1:
+            print("|", end="")
+        if len(str(n)) == 1:
+            s = str(n) + " "
+        else:
+            s = str(n)
+        print("{}".format(s), end="")
+
+        if c%3 != 0:
+            print(" ", end="")
 
 
+        if c%3 == 0 and x<2:
+            x += 1
+            print("|", end="")
 
-# def validate(puzzle):
-#     global aGroups
-#     for groupToCheck in aGroups:
-#         alreadyThere = set()
-#         for pos in groupToCheck:
-#             if puzzle[pos] in alreadyThere:
-#                 return False
-#             else:
-#                 alreadyThere.add(puzzle[pos])
+        if c==9:
+            print("|", end="")
+
+        if i%9 == 0:
+            c = 0
+            x = 0
+            if int(i/9)%3==0 and r<9:
+                print("\n|--------+--------+--------|")
+            else:
+                print()
+
+        i += 1
+        n += 1
+    print("````````````````````````````")
 
 
+def validate(puzzle):
+    global allGroups
+    for groupToCheck in allGroups:
+        alreadyThere = set()
+        for pos in groupToCheck:
+            if puzzle[pos] in alreadyThere:
+                return False
+            else:
+                if puzzle[pos] != '.':
+                    alreadyThere.add(puzzle[pos])
 
 file = open('sudoku.txt', 'r')
 
@@ -104,9 +165,8 @@ if len(sys.argv) == 2:
     puzzle = sudoku[i]
     showBoard(puzzle)
     start = time.clock()
-    #puzzle = bruteForce(puzzle)
 
-    #print("Puzzle {}".format(count))
+    #puzzle = bruteForce(puzzle)
 
     showBoard(puzzle)
     delta = time.clock() - start
@@ -116,10 +176,11 @@ if len(sys.argv) == 2:
         print("Puzzle {} completed in {} seconds.".format(count, delta))
     print()
     #print(puzzle)
+
     print("\n")
-    print(allGroups)
-    print(allSyms)
-    print(cellNeighbors[1])
+
+    print (findPossible(puzzle))
+
 
 
 
