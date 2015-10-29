@@ -1,4 +1,4 @@
-import sys, time, queue
+import sys, time, queue, pickle
 from multiprocessing import Pool
 
 def bruteForce(puzzle):
@@ -178,6 +178,7 @@ def solve(start, end):
         string = ""
 
         start = time.clock()
+        find
         puzzle = bruteForce(puzzle)
         delta = time.clock() - start
 
