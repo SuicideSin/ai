@@ -11,24 +11,59 @@ guesses = 0
 def findPossible(puzzle):
     dic = {}
     for i in range(0, 81):
-        dic[i] = allSyms - {puzzle[ps] for ps in cellNeighbors[i] if puzzle[ps] != '.'}
+        if puzzle[i] == '.':
+            dic[i] = allSyms - {puzzle[ps] for ps in cellNeighbors[i] if puzzle[ps] != '.'}
     return dic
 
-def bruteForce(puzzle):
+def bruteForce(puzzle, pos):
 
     global possible, guesses
-    guesses += 1
 
-    if not validate(puzzle):
+    if pos == None:
+
+
+        guesses += 1
+
+        if not validate(puzzle, None):
+            return ""
+        pos = puzzle.find('.')
+        if pos < 0:
+            return puzzle
+
+        min = 10
+        for i in possible:
+            s = len(possible[i])
+            if s < min and puzzle[i]==".":
+                min = s
+                pos = i
+
+        for char in possible[pos]:
+            bf = bruteForce(puzzle[:pos] + char + puzzle[pos+1:], pos)
+            if bf != "":
+                return bf
         return ""
-    pos = puzzle.find('.')
-    if pos < 0:
-        return puzzle
-    for char in possible[pos]:
-        bf = bruteForce(puzzle[:pos] + char + puzzle[pos+1:])
-        if bf != "":
-            return bf
-    return ""
+
+    else:
+        guesses += 1
+
+        if not validate(puzzle, pos):
+            return ""
+        pos = puzzle.find('.')
+        if pos < 0:
+            return puzzle
+
+        min = 10
+        for i in possible:
+            s = len(possible[i])
+            if s < min and puzzle[i]==".":
+                min = s
+                pos = i
+
+        for char in possible[pos]:
+            bf = bruteForce(puzzle[:pos] + char + puzzle[pos+1:], pos)
+            if bf != "":
+                return bf
+        return ""
 
 
 def showBoard(puzzle):
@@ -68,17 +103,41 @@ def showBoard(puzzle):
         i += 1
     print("```````````````````")
 
-def validate(puzzle):
-    global allGroups
-    for groupToCheck in allGroups:
+# def validate(puzzle):
+#     global allGroups
+#     for groupToCheck in allGroups:
+#         alreadyThere = set()
+#         for pos in groupToCheck:
+#             if puzzle[pos] in alreadyThere:
+#                 return False
+#             else:
+#                 if puzzle[pos] != '.':
+#                     alreadyThere.add(puzzle[pos])
+#     return True
+
+def validate(puzzle, index):
+    global cellNeighbors
+
+    if index == None:
+        for groupToCheck in allGroups:
+            alreadyThere = set()
+            for pos in groupToCheck:
+                if puzzle[pos] in alreadyThere:
+                    return False
+                else:
+                    if puzzle[pos] != '.':
+                        alreadyThere.add(puzzle[pos])
+        return True
+
+    else:
         alreadyThere = set()
-        for pos in groupToCheck:
-            if puzzle[pos] in alreadyThere:
+        for i in cellNeighbors[index]:
+            if puzzle[index] in alreadyThere:
                 return False
             else:
-                if puzzle[pos] != '.':
-                    alreadyThere.add(puzzle[pos])
-    return True
+                if puzzle[index] != '.':
+                    alreadyThere.add(puzzle[index])
+        return True
 
 file = open('sudoku.txt', 'r')
 
@@ -110,19 +169,17 @@ if len(sys.argv) == 2:
         print("Puzzle {} completed in {} seconds.".format(count, delta))
     print()
     #print(solved)
-    print("{} guesses.".format(guesses))
     print("\n")
 
 if len(sys.argv) == 1:
     total = 0
     for i in sudoku:
-        guesses = 0
         count = i+1
         puzzle = sudoku[i]
 
         start = time.clock()
         possible = findPossible(puzzle)
-        solved = bruteForce(puzzle)
+        solved = bruteForce(puzzle, None)
 
         #print("Puzzle {}".format(count))
         #showBoard(puzzle)
@@ -135,14 +192,17 @@ if len(sys.argv) == 1:
         print(puzzle)
         print(solved)
         total += delta
-        print("Total time elapsed: {} seconds".format(total))
-        print("{} guesses.".format(guesses))
+
+        if count == 51:
+            if len(sys.argv) != 2:
+                print("\nTotal time elapsed: {} seconds".format(total))
+            print("{} guesses.".format(guesses))
+
         print("\n")
 
 if len(sys.argv) == 3:
     total = 0
     for i in range(int(sys.argv[1]), int(sys.argv[2])+1):
-        guesses = 0
         count = i
         puzzle = sudoku[i-1]
 
@@ -159,12 +219,11 @@ if len(sys.argv) == 3:
         print(puzzle)
         print(solved)
         total += delta
-        print("Total time elapsed: {} seconds".format(total))
-        print("{} guesses.".format(guesses))
         print("\n")
 
-
-
+if len(sys.argv) != 2:
+    print("Total time elapsed: {} seconds".format(total))
+print("{} guesses.".format(guesses))
 
 
 
