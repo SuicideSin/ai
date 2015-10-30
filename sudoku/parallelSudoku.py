@@ -1,14 +1,40 @@
-import sys, time, queue, pickle
+import sys, time, pickle, queue
 from multiprocessing import Pool
+
+list = pickle.load( open( 'sets.pkl' , 'rb' ) )
+
+allGroups = list[0]
+allSyms = set(str(i) for i in range(1, 10))
+cellNeighbors = list[1]
+possible = {}
+guesses = 0
+
+def findPossible(puzzle):
+    dic = {}
+    for i in range(0, 81):
+        if puzzle[i] == '.':
+            dic[i] = allSyms - {puzzle[ps] for ps in cellNeighbors[i] if puzzle[ps] != '.'}
+    return dic
 
 def bruteForce(puzzle):
 
-    if not validateSudoku(puzzle):
+    global possible, guesses
+    guesses += 1
+
+    if not validate(puzzle):
         return ""
     pos = puzzle.find('.')
     if pos < 0:
         return puzzle
-    for char in "123456789":
+
+    min = 10
+    for i in possible:
+        s = len(possible[i])
+        if s < min and puzzle[i]==".":
+            min = s
+            pos = i
+
+    for char in possible[pos]:
         bf = bruteForce(puzzle[:pos] + char + puzzle[pos+1:])
         if bf != "":
             return bf
@@ -52,110 +78,35 @@ def showBoard(puzzle):
         i += 1
     print("```````````````````")
 
-def stringBoard(puzzle):
-    string = ""
-    if puzzle == "":
-        return
-    i = 1
-    x = 0
-    c = 0
-    string += ",,,,,,,,,,,,,,,,,,,\n"
-    for char in puzzle:
-        r = int(i/9)
-        c += 1
-        if c == 1:
-            string += "|"
-
-        string += char
-
-        if c%3 != 0:
-            string += " "
-
-
-        if c%3 == 0 and x<2:
-            x += 1
-            string += "|"
-
-        if c==9:
-            string += "|"
-
-        if i%9 == 0:
-            c = 0
-            x = 0
-            if int(i/9)%3==0 and r<9:
-                string += "\n|-----+-----+-----|\n"
+def validatePart(puzzle, start, end):
+    global allGroups
+    for i in range(start, end):
+        grouptoCheck = allGroups[i]
+        alreadyThere = set()
+        for pos in groupToCheck:
+            if puzzle[pos] in alreadyThere:
+                return False
             else:
-                string += "\n"
+                if puzzle[pos] != '.':
+                    alreadyThere.add(puzzle[pos])
+    return True
 
-        i += 1
-    string += "```````````````````\n"
+def validate(puzzle):
+    pool = Pool()
+    r1 = pool.apply_async(validate, [puzzle, 0, 7])
+    r2 = pool.apply_async(validate, [puzzle, 7, 14])
+    r3 = pool.apply_async(validate, [puzzle, 14, 21])
+    r4 = pool.apply_async(validate, [puzzle, 21, 27])
 
-    return string
+    a1 = r1.get(timeout=10)
+    a2 = r2.get(timeout=10)
+    a3 = r3.get(timeout=10)
+    a4 = r4.get(timeout=10)
 
-def validateUnit(unit):
-    # if len(unit) != 9:
-    #     return False
-    # if '.' in unit:
-    #     return False
-    # for num in "123456789":
-    #     if num not in unit:
-    #         return False
-
-    temp = ""
-    for num in unit:
-        if num not in "123456789.":
-            return False
-        if num != '.':
-            temp += num
-    if len(temp)!=len(set(temp)):
+    if a1 or a2 or a3 or a4 == False:
         return False
     return True
 
-
-
-def validateSudoku(puzzle):
-    dic = {}
-    cols = {}
-    boxes = {}
-
-    i = 0
-    for char in puzzle:
-        r = int(i/9)
-        if r not in dic:
-            dic[r] = []
-        dic[r].append(char)
-
-        c = i%9
-        if c not in cols:
-            cols[c] = []
-        cols[c].append(char)
-
-        rsec = int(r/3)
-        csec = int(c/3)
-        b = str(rsec) + str(csec)
-        if b not in boxes:
-            boxes[b] = []
-        boxes[b].append(char)
-        i += 1
-
-    for r in range(0,9):
-        for c in range(0,9):
-            char = dic[r][c]
-
-            #if char != '.' or char == '.':
-            r = r
-            c = c
-            rsec = int(r/3)
-            csec = int(c/3)
-            b = str(rsec) + str(csec)
-
-            row = dic[r]
-            col = cols[c]
-            box = boxes[b]
-
-            if not (validateUnit(col) and validateUnit(row) and validateUnit(box)):
-                return False
-    return True
 
 file = open('sudoku.txt', 'r')
 
@@ -167,89 +118,81 @@ for line in file:
 
 puzzle = sudoku[0]
 
-file = open("parallel.txt", 'w')
+if len(sys.argv) == 2:
+    count = int(sys.argv[1])
+    i = count - 1
+    print(sudoku[i])
 
-def solve(start, end):
-    tuples = []
+    puzzle = sudoku[i]
+    showBoard(puzzle)
+    start = time.clock()
+    possible = findPossible(puzzle)
 
-    for i in range(start, end):
-        puzzle = sudoku[i]
-        count = i+1
-        string = ""
+    solved = bruteForce(puzzle)
 
-        start = time.clock()
-        find
-        puzzle = bruteForce(puzzle)
-        delta = time.clock() - start
-
-        string += "Puzzle " + str(count) + "\n"
-        string += stringBoard(puzzle)
-        if(delta >= 60):
-            string += "Puzzle {} completed in {} minutes and {} seconds.\n".format(count, int(delta/60), delta%60)
-        else:
-            string += "Puzzle {} completed in {} seconds.\n".format(count, delta)
-        string += "===============================================================\n\n"
-
-        tuple = (i, string)
-        tuples.append(tuple)
-
-    return tuples
-
-
+    showBoard(solved)
+    delta = time.clock() - start
+    if(delta >= 60):
+        print("Puzzle {} completed in {} minutes and {} seconds.".format(count, int(delta/60), delta%60))
+    else:
+        print("Puzzle {} completed in {} seconds.".format(count, delta))
+    print()
+    #print(solved)
+    print("\n")
 
 if len(sys.argv) == 1:
+    total = 0
+    for i in sudoku:
+        count = i+1
+        puzzle = sudoku[i]
 
-    pool = Pool()
-    r1 = pool.apply_async(solve, [0, 16])
-    r2 = pool.apply_async(solve, [16, 32])
-    r3 = pool.apply_async(solve, [32, 48])
-    r4 = pool.apply_async(solve, [48, 64])
-    r5 = pool.apply_async(solve, [64, 80])
-    r6 = pool.apply_async(solve, [80, 96])
-    r7 = pool.apply_async(solve, [96, 112])
-    r8 = pool.apply_async(solve, [112, 128])
+        start = time.clock()
+        possible = findPossible(puzzle)
+        solved = bruteForce(puzzle)
 
-    a1 = r1.get(timeout=10000)
-    a2 = r2.get(timeout=10000)
-    a3 = r3.get(timeout=100000)
-    a4 = r4.get(timeout=100000)
-    a5 = r5.get(timeout=1000000)
-    a6 = r6.get(timeout=1000000)
-    a7 = r7.get(timeout=10000000)
-    a8 = r8.get(timeout=10000000)
+        #print("Puzzle {}".format(count))
+        #showBoard(puzzle)
 
-    # r1 = pool.apply_async(solve, [0, 2])
-    # r2 = pool.apply_async(solve, [2, 4])
-    # r3 = pool.apply_async(solve, [4, 6])
-    # r4 = pool.apply_async(solve, [6, 8])
-    # r5 = pool.apply_async(solve, [8, 10])
-    # r6 = pool.apply_async(solve, [10, 12])
-    # r7 = pool.apply_async(solve, [12, 14])
-    # r8 = pool.apply_async(solve, [14, 16])
-    #
-    # a1 = r1.get(timeout=10000)
-    # a2 = r2.get(timeout=10000)
-    # a3 = r3.get(timeout=100000)
-    # a4 = r4.get(timeout=100000)
-    # a5 = r5.get(timeout=1000000)
-    # a6 = r6.get(timeout=1000000)
-    # a7 = r7.get(timeout=10000000)
-    # a8 = r8.get(timeout=10000000)
+        delta = time.clock() - start
+        if(delta >= 60):
+            print("Puzzle {} completed in {} minutes and {} seconds.".format(count, int(delta/60), delta%60))
+        else:
+            print("Puzzle {} completed in {} seconds.".format(count, delta))
+        print(puzzle)
+        print(solved)
+        total += delta
 
-    array = a1 + a2 + a3 + a4 + a5 + a6+ a7+ a8
+        if count == 51:
+            if len(sys.argv) != 2:
+                print("\nTotal time elapsed: {} seconds".format(total))
+            print("{} guesses.".format(guesses))
 
-    q = queue.PriorityQueue()
+        print("\n")
 
-    for tuple in array:
-        q.put(tuple)
+if len(sys.argv) == 3:
+    total = 0
+    for i in range(int(sys.argv[1]), int(sys.argv[2])+1):
+        count = i
+        puzzle = sudoku[i-1]
 
-    while q:
-        print(q.get()[1])
+        start = time.clock()
+        possible = findPossible(puzzle)
+        solved = bruteForce(puzzle)
 
-    #
-    # print(q.get())
-    # print(q.get())
 
+        delta = time.clock() - start
+        if(delta >= 60):
+            print("Puzzle {} completed in {} minutes and {} seconds.".format(count, int(delta/60), delta%60))
+        else:
+            print("Puzzle {} completed in {} seconds.".format(count, delta))
+        print(puzzle)
+        print(solved)
+        total += delta
+        print("\n")
+
+if len(sys.argv) != 2:
+    print("Total time elapsed: {} seconds".format(total))
+print("{} guesses.".format(guesses))
 
 
 
