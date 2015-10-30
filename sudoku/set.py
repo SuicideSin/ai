@@ -1,3 +1,12 @@
-dic = {}
+dic = {1: 'lol', 2: 'lmao'}
 
-dic[0] = 'd'
+newDic = dict(dic)
+
+print(dic)
+print(newDic)
+
+
+del newDic[1]
+
+print(dic)
+print(newDic)
