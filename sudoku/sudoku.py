@@ -11,7 +11,8 @@ guesses = 0
 def findPossible(puzzle):
     dic = {}
     for i in range(0, 81):
-        dic[i] = allSyms - {puzzle[ps] for ps in cellNeighbors[i] if puzzle[ps] != '.'}
+        if puzzle[i] == '.':
+            dic[i] = allSyms - {puzzle[ps] for ps in cellNeighbors[i] if puzzle[ps] != '.'}
     return dic
 
 def bruteForce(puzzle):
@@ -24,6 +25,14 @@ def bruteForce(puzzle):
     pos = puzzle.find('.')
     if pos < 0:
         return puzzle
+
+    min = 10
+    for i in possible:
+        s = len(possible[i])
+        if s < min and puzzle[i]==".":
+            min = s
+            pos = i
+
     for char in possible[pos]:
         bf = bruteForce(puzzle[:pos] + char + puzzle[pos+1:])
         if bf != "":
