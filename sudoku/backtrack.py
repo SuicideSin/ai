@@ -7,7 +7,6 @@ allSyms = set(str(i) for i in range(1, 10))
 cellNeighbors = list[1]
 possible = {}
 guesses = 0
-lowest = queue.PriorityQueue()
 
 def findPossible(puzzle):
     dic = {}
@@ -16,29 +15,19 @@ def findPossible(puzzle):
             dic[i] = allSyms - {puzzle[ps] for ps in cellNeighbors[i] if puzzle[ps] != '.'}
     return dic
 
-def bruteForce(puzzle):
+def solve(puzzle):
+    global possible, guesses, allGroups, allSyms, cellNeighbors
+    prev = 0
+    for i in range(0, 81):
+        visited = []
+        options = possible[i]
+        for char in options:
+            maybe = puzzle[:i] + char + puzzle[i+1:]
 
-    global possible, guesses, lowest
-    guesses += 1
 
-    if not validate(puzzle):
-        return ""
-    pos = puzzle.find('.')
-    if pos < 0:
-        return puzzle
+        prev = i
 
-    min = 10
-    for i in possible:
-        s = len(possible[i])
-        if s < min and puzzle[i]==".":
-            min = s
-            pos = i
 
-    for char in possible[pos]:
-        bf = bruteForce(puzzle[:pos] + char + puzzle[pos+1:])
-        if bf != "":
-            return bf
-    return ""
 
 
 def showBoard(puzzle):
@@ -110,7 +99,7 @@ if len(sys.argv) == 2:
     start = time.clock()
     possible = findPossible(puzzle)
 
-    solved = bruteForce(puzzle)
+    solved = solve(puzzle)
 
     showBoard(solved)
     delta = time.clock() - start
@@ -130,7 +119,7 @@ if len(sys.argv) == 1:
 
         start = time.clock()
         possible = findPossible(puzzle)
-        solved = bruteForce(puzzle)
+        solved = solve(puzzle)
 
         #print("Puzzle {}".format(count))
         #showBoard(puzzle)
@@ -159,7 +148,7 @@ if len(sys.argv) == 3:
 
         start = time.clock()
         possible = findPossible(puzzle)
-        solved = bruteForce(puzzle)
+        solved = solve(puzzle)
 
 
         delta = time.clock() - start

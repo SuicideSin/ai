@@ -1,12 +1,4 @@
-dic = {1: 'lol', 2: 'lmao'}
-
-newDic = dict(dic)
-
-print(dic)
-print(newDic)
+from sudoku import showBoard
 
 
-del newDic[1]
-
-print(dic)
-print(newDic)
+showBoard("8..976532.5.123478.3.854169948265317275341896163798245391682754587439621426517983")
