@@ -36,8 +36,7 @@ for box in boxes:
 for i in range(0, 81):
     for group in allGroups:
         if i in group:
-            temp = set(group)
-            cellNeighbors[i] = cellNeighbors[i] | temp
+            cellNeighbors[i] = cellNeighbors[i] | set(group)
 
 list = []
 list.append(allGroups)
