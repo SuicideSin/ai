@@ -125,9 +125,15 @@ aBox = list of lists of positions
 
 aRow = [[ startPos + offSet for offset in range(9)  ] for startPos in range(0, 81, 9)  ]
 
+'''
+Pythonic cellNeighbors construction
+'''
 
-
-
+cellNeighbors = [set() for dummy range(0, 81)]
+for grp in aGroups:
+    for pos1 in grp:
+        for pos2 in grp:
+            cellNeighbors[pos1].add(pos2)
 
 
 

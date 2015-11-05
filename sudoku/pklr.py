@@ -34,12 +34,10 @@ for box in boxes:
     allGroups.append(boxes[box])
 
 for i in range(0, 81):
-    cellNeighbors[i] = {i}
     for group in allGroups:
         if i in group:
             temp = set(group)
             cellNeighbors[i] = cellNeighbors[i] | temp
-            cellNeighbors[i].remove(i)
 
 list = []
 list.append(allGroups)
