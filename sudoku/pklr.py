@@ -33,10 +33,12 @@ for i in range(0, 81):
 for box in boxes:
     allGroups.append(boxes[box])
 
-for i in range(0, 81):
-    for group in allGroups:
-        if i in group:
-            cellNeighbors[i] = cellNeighbors[i] | set(group)
+# for i in range(0, 81):
+#     for group in allGroups:
+#         if i in group:
+#             cellNeighbors[i] = cellNeighbors[i] | set(group)
+
+cellNeighbors = [set().union(*[grp for grp in allGroups if pos in grp]) - {pos} for pos in range(0, 81)]
 
 list = []
 list.append(allGroups)

@@ -132,10 +132,9 @@ Pythonic cellNeighbors construction
 cellNeighbors = [set() for dummy range(0, 81)]
 for grp in aGroups:
     for pos1 in grp:
-        for pos2 in grp:
-            cellNeighbors[pos1].add(pos2)
+        cellNeighbors[pos1] |= (grp - {pos1})
 
-
+cellNeighbors = [set().union(*[grp for grp in aGroups if pos in grp]) - {pos} for pos in range(0, 81)]
 
 
 
