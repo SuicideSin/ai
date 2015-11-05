@@ -115,8 +115,15 @@ bar = foo '''POINTS TO THE LIST, changes to bar will affect foo'''
 mySet = {1,2,3,4}
 myCopiedSet = mySet + set()
 
+'''
+Pythonic allGroups construction
 
+aRow = list of lists of positions
+aCol = list of lists of positions
+aBox = list of lists of positions
+'''
 
+aRow = [[ startPos + offSet for offset in range(9)  ] for startPos in range(0, 81, 9)  ]
 
 
 
