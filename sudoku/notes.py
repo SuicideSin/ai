@@ -136,6 +136,15 @@ for grp in aGroups:
 
 cellNeighbors = [set().union(*[grp for grp in aGroups if pos in grp]) - {pos} for pos in range(0, 81)]
 
+''''
+Operations on hashes on a per element basis is basically constant, because elements in sets are hashed
+
+
+Pythonic Validation
+''''
+
+
+
 
 
 #
