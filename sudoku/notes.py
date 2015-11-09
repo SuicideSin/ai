@@ -144,6 +144,10 @@ Pythonic Validation
 ''''
 
 
+'''
+Create unGroup, which is a list where the index indicates the group number and the entry is the set of all position in that group that are not set
+'''
+
 
 
 

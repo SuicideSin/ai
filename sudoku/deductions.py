@@ -4,7 +4,7 @@ list = pickle.load( open( 'sets.pkl' , 'rb' ) )
 
 allGroups = list[0]
 allSyms = set(str(i) for i in range(1, 10))
-cellNeighbors = list[1]
+cellNeighbors = [set().union(*[grp for grp in allGroups if pos in grp]) - {pos} for pos in range(0, 81)]
 possible = {}
 guesses = 0
 lowest = queue.PriorityQueue()
@@ -16,9 +16,10 @@ def findPossible(puzzle):
             dic[i] = allSyms - {puzzle[ps] for ps in cellNeighbors[i] if puzzle[ps] != '.'}
     return dic
 
+
 def bruteForce(puzzle):
 
-    global possible, guesses, lowest, allGroups
+    global guesses, allGroups, cellNeighbors
     guesses += 1
 
     if not validate(puzzle):
@@ -26,13 +27,23 @@ def bruteForce(puzzle):
     pos = puzzle.find('.')
     if pos < 0:
         return puzzle
+    allPossible = {i : allSyms - {puzzle[ps] for ps in cellNeighbors[i] if puzzle[ps] != '.'} for i in range(0, 81)}
+    possible = {i : allPossible[i] for i in allPossible if puzzle[i] not in allPossible[i]}
 
-    # min = 10
-    # for i in possible:
-    #     s = len(possible[i])
-    #     if s < min and puzzle[i]==".":
-    #         min = s
-    #         pos = i
+    # unGroup = [{i for i in group if group[i] == "."} for group in allGroups]
+    # dicSymPos = {sym : {pos for pos in possible if sym in possible[pos]} for sym in allSyms}
+    # dicSymPos = {sym: dicSymPos[sym] for sym in dicSymPos if len(dicSymPos[sym]) > 0}
+
+    min = 10
+    for i in possible:
+        s = len(possible[i])
+        if s == 1 and puzzle[i] == ".":
+            pos = i
+            break
+
+        if s < min and puzzle[i] == ".":
+            min = s
+            pos = i
 
     for char in possible[pos]:
         bf = bruteForce(puzzle[:pos] + char + puzzle[pos+1:])
@@ -119,8 +130,9 @@ if len(sys.argv) == 2:
     else:
         print("Puzzle {} completed in {} seconds.".format(count, delta))
     print()
-    #print(solved)
     print("\n")
+
+    #print(lol)
 
 if len(sys.argv) == 1:
     total = 0
