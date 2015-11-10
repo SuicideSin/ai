@@ -150,5 +150,42 @@ Create unGroup, which is a list where the index indicates the group number and t
 
 
 
+def bf(puzzle):
+    puzzle, possible = makeDeductions(puzzle)
+
+    find cell with '.'
+
+    for each possible char @ the position
+        pzl = bf(puzzle with char stuffed in)
+        if pzl != "": return pzl
+
+    return puzzle
+
+
+def makeDeductions(puzzle):
+    possible = findPossible(puzzle)
+    
+    while deductions can be made:
+        make a dedcution =>
+            update puzzle
+            update possible
+    return (puzzle, possible)
+
+''' Deductions
+1. If only one value is not excluded from being in a box, then the value must go in that box
+2. If there is only one box where a value is not excluded from in a unit, then the value must go there.
+3. If in a group there are K cells that have only the same K possiblities, then those K possibilities can be excluded from all other cells
+
+
+- if 0 possibilities, puzzle is invalid, return ""
+- If there is an entry with only 2 possible locations in possible dictionaries, choose one of those positions
+
+[(pos1, sym1), (pos2, sym1), (pos1, sym2)]
+
+'''
+
+
+
+
 
 #

@@ -1,4 +1,2 @@
-from sudoku import showBoard
-
-
-showBoard("8..976532.5.123478.3.854169948265317275341896163798245391682754587439621426517983")
+for i in range(0, 100) if i % 2 ==0:
+    print(i)

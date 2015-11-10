@@ -10,25 +10,32 @@ guesses = 0
 lowest = queue.PriorityQueue()
 
 def findPossible(puzzle):
-    dic = {}
-    for i in range(0, 81):
-        if puzzle[i] == '.':
-            dic[i] = allSyms - {puzzle[ps] for ps in cellNeighbors[i] if puzzle[ps] != '.'}
-    return dic
+    allPossible = {i : allSyms - {puzzle[ps] for ps in cellNeighbors[i] if puzzle[ps] != '.'} for i in range(0, 81)}
+    return {i : allPossible[i] for i in allPossible if puzzle[i] not in allPossible[i]}
 
+def makeDeductions(puzzle):
+    possible = findPossible(puzzle)
+
+    # while Deductions can be made:
+    #     make a dedcution =>
+    #         update puzzle
+    #         update possible
+
+
+
+    return (puzzle, possible)
 
 def bruteForce(puzzle):
 
     global guesses, allGroups, cellNeighbors
     guesses += 1
 
-    if not validate(puzzle):
-        return ""
+    puzzle, possible = makeDeductions(puzzle)
+
     pos = puzzle.find('.')
     if pos < 0:
         return puzzle
-    allPossible = {i : allSyms - {puzzle[ps] for ps in cellNeighbors[i] if puzzle[ps] != '.'} for i in range(0, 81)}
-    possible = {i : allPossible[i] for i in allPossible if puzzle[i] not in allPossible[i]}
+
 
     # unGroup = [{i for i in group if group[i] == "."} for group in allGroups]
     # dicSymPos = {sym : {pos for pos in possible if sym in possible[pos]} for sym in allSyms}
@@ -89,18 +96,6 @@ def showBoard(puzzle):
         i += 1
     print("```````````````````")
 
-def validate(puzzle):
-    global allGroups
-    for groupToCheck in allGroups:
-        alreadyThere = set()
-        for pos in groupToCheck:
-            if puzzle[pos] in alreadyThere:
-                return False
-            else:
-                if puzzle[pos] != '.':
-                    alreadyThere.add(puzzle[pos])
-    return True
-
 file = open('sudoku.txt', 'r')
 
 sudoku = {}
@@ -155,11 +150,6 @@ if len(sys.argv) == 1:
         print(puzzle)
         print(solved)
         total += delta
-
-        if count == 51:
-            if len(sys.argv) != 2:
-                print("\nTotal time elapsed: {} seconds".format(total))
-            print("{} guesses.".format(guesses))
 
         print("\n")
 
