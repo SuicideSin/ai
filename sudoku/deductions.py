@@ -1,13 +1,26 @@
-import sys, time, pickle, queue
+import sys, time, queue
 
-list = pickle.load( open( 'sets.pkl' , 'rb' ) )
+allRows = [[pos for pos in range(row, row+9)] for row in range(0, 81, 9)]
+allCols = [[pos for pos in range(col, 81, 9)] for col in range(9)]
 
-allGroups = list[0]
-allSyms = set(str(i) for i in range(1, 10))
+boxes = {}
+for i in range(0, 81):
+    r = int(i/9)
+    c = i%9
+    rsec = int(r/3)
+    csec = int(c/3)
+    b = "".join([str(rsec), str(csec)])
+    if b not in boxes:
+        boxes[b] = []
+    boxes[b].append(i)
+allBoxes = [boxes[box] for box in boxes]
+
+allGroups = allRows + allCols + allBoxes
+
+allSyms = {str(i) for i in range(1, 10)}
 cellNeighbors = [set().union(*[grp for grp in allGroups if pos in grp]) - {pos} for pos in range(0, 81)]
 possible = {}
 guesses = 0
-lowest = queue.PriorityQueue()
 
 def findPossible(puzzle):
     allPossible = {i : allSyms - {puzzle[ps] for ps in cellNeighbors[i] if puzzle[ps] != '.'} for i in range(0, 81)}
@@ -18,8 +31,35 @@ def makeDeductions(puzzle):
 
     # while Deductions can be made:
     #     make a dedcution =>
-    #         update puzzle
+    #         update puzzle and/or
     #         update possible
+    freq = {sym: 0 for sym in allSyms}
+
+    for i in possible:
+
+        if puzzle[i] == ".":
+            if len(possible[i]) == 0:
+                return ""
+            if len(possible[i]) == 1:
+                for char in possible[i]:
+                    for pos in cellNeighbors[i]:
+                        if pos in possible:
+                            if char in possible[pos]:
+                                possible[pos].remove(char)
+                    puzzle = puzzle[:i] + char + puzzle[i+1:]
+        else:
+            freq[puzzle] += 1
+
+
+
+
+    # for grp in allGroups:
+    #     for pos in grp:
+    #         if pos in possible:
+    #             for sym in allSyms:
+    #                 if sym in possible[pos] and sym not in { c in possible[i] for i in grp if i != pos and i in possible}:
+    #                     puzzle = puzzle[:pos] + sym + puzzle[pos+1:]
+
 
 
 
@@ -30,16 +70,15 @@ def bruteForce(puzzle):
     global guesses, allGroups, cellNeighbors
     guesses += 1
 
-    puzzle, possible = makeDeductions(puzzle)
+    tpl = makeDeductions(puzzle)
+    if tpl == "":
+        return ""
+    puzzle, possible = tpl
 
     pos = puzzle.find('.')
     if pos < 0:
         return puzzle
 
-
-    # unGroup = [{i for i in group if group[i] == "."} for group in allGroups]
-    # dicSymPos = {sym : {pos for pos in possible if sym in possible[pos]} for sym in allSyms}
-    # dicSymPos = {sym: dicSymPos[sym] for sym in dicSymPos if len(dicSymPos[sym]) > 0}
 
     min = 10
     for i in possible:
@@ -127,9 +166,10 @@ if len(sys.argv) == 2:
     print()
     print("\n")
 
-    #print(lol)
+    print(findPossible(puzzle))
 
 if len(sys.argv) == 1:
+    fout = open("test.txt", "w")
     total = 0
     for i in sudoku:
         count = i+1
@@ -152,6 +192,7 @@ if len(sys.argv) == 1:
         total += delta
 
         print("\n")
+        fout.write(solved + "\n")
 
 if len(sys.argv) == 3:
     total = 0

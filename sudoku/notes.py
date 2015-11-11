@@ -164,7 +164,7 @@ def bf(puzzle):
 
 def makeDeductions(puzzle):
     possible = findPossible(puzzle)
-    
+
     while deductions can be made:
         make a dedcution =>
             update puzzle
@@ -178,7 +178,7 @@ def makeDeductions(puzzle):
 
 
 - if 0 possibilities, puzzle is invalid, return ""
-- If there is an entry with only 2 possible locations in possible dictionaries, choose one of those positions
+- If there is an entry with only 2 possible locations in possible dictionary, choose one of those positions
 
 [(pos1, sym1), (pos2, sym1), (pos1, sym2)]
 
