@@ -33,7 +33,6 @@ def makeDeductions(puzzle):
     #     make a dedcution =>
     #         update puzzle and/or
     #         update possible
-    freq = {sym: 0 for sym in allSyms}
 
     for i in possible:
 
@@ -50,15 +49,12 @@ def makeDeductions(puzzle):
         else:
             freq[puzzle] += 1
 
-
-
-
-    # for grp in allGroups:
-    #     for pos in grp:
-    #         if pos in possible:
-    #             for sym in allSyms:
-    #                 if sym in possible[pos] and sym not in { c in possible[i] for i in grp if i != pos and i in possible}:
-    #                     puzzle = puzzle[:pos] + sym + puzzle[pos+1:]
+    for grp in allGroups:
+        for pos in grp:
+            if pos in possible:
+                for sym in possible[pos]:
+                    if sym in { c in possible[i] for i in grp if i != pos and i in possible}:
+                        puzzle = puzzle[:pos] + sym + puzzle[pos+1:]
 
 
 
@@ -82,14 +78,14 @@ def bruteForce(puzzle):
 
     min = 10
     for i in possible:
-        s = len(possible[i])
-        if s == 1 and puzzle[i] == ".":
-            pos = i
-            break
-
-        if s < min and puzzle[i] == ".":
-            min = s
-            pos = i
+        if puzzle[i] == ".":
+            s = len(possible[i])
+            if s == 1:
+                pos = i
+                break
+            if s < min:
+                min = s
+                pos = i
 
     for char in possible[pos]:
         bf = bruteForce(puzzle[:pos] + char + puzzle[pos+1:])
@@ -169,7 +165,7 @@ if len(sys.argv) == 2:
     print(findPossible(puzzle))
 
 if len(sys.argv) == 1:
-    fout = open("test.txt", "w")
+    fout = open("valid.txt", "w")
     total = 0
     for i in sudoku:
         count = i+1

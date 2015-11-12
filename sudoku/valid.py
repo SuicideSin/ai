@@ -31,7 +31,7 @@ def validate(puzzle):
     return True
 
 
-file = open('test.txt', 'r')
+file = open('valid.txt', 'r')
 
 sudoku = {}
 i = 0

@@ -141,7 +141,7 @@ Operations on hashes on a per element basis is basically constant, because eleme
 
 
 Pythonic Validation
-''''
+'''
 
 
 '''
