@@ -1,8 +1,5 @@
 import sys, time, queue
 
-allRows = [[pos for pos in range(row, row+9)] for row in range(0, 81, 9)]
-allCols = [[pos for pos in range(col, 81, 9)] for col in range(9)]
-
 boxes = {}
 for i in range(0, 81):
     r = int(i/9)
@@ -15,11 +12,10 @@ for i in range(0, 81):
     boxes[b].append(i)
 allBoxes = [boxes[box] for box in boxes]
 
-allGroups = allRows + allCols + allBoxes
+allGroups = [[pos for pos in range(row, row+9)] for row in range(0, 81, 9)] + [[pos for pos in range(col, 81, 9)] for col in range(9)] + allBoxes
 
 allSyms = {str(i) for i in range(1, 10)}
 cellNeighbors = [set().union(*[grp for grp in allGroups if pos in grp]) - {pos} for pos in range(0, 81)]
-possible = {}
 guesses = 0
 
 def findPossible(puzzle):
@@ -27,18 +23,16 @@ def findPossible(puzzle):
     return {i : allPossible[i] for i in allPossible if puzzle[i] not in allPossible[i]}
 
 def makeDeductions(puzzle):
+    global cellNeighbors, allGroups
     possible = findPossible(puzzle)
-
-    # while Deductions can be made:
-    #     make a dedcution =>
-    #         update puzzle and/or
-    #         update possible
 
     for i in possible:
 
         if puzzle[i] == ".":
             if len(possible[i]) == 0:
                 return ""
+                
+            '''If only one value is not excluded from being in a box, then the value must go in that box'''
             if len(possible[i]) == 1:
                 for char in possible[i]:
                     for pos in cellNeighbors[i]:
@@ -46,18 +40,19 @@ def makeDeductions(puzzle):
                             if char in possible[pos]:
                                 possible[pos].remove(char)
                     puzzle = puzzle[:i] + char + puzzle[i+1:]
-        else:
-            freq[puzzle] += 1
+
+    '''If in a group there are K cells that have only the same K possiblities, then those K possibilities can be excluded from all other cells'''
 
     for grp in allGroups:
-        for pos in grp:
-            if pos in possible:
-                for sym in possible[pos]:
-                    if sym in { c in possible[i] for i in grp if i != pos and i in possible}:
-                        puzzle = puzzle[:pos] + sym + puzzle[pos+1:]
-
-
-
+        subsets = {pos: possible[pos] for pos in grp if pos in possible}
+        array = list(subsets.values())
+        for pos in subsets:
+            if len(subsets[pos]) == array.count(subsets[pos]):
+                for j in subsets:
+                    if subsets[pos] != subsets[j]:
+                        for char in subsets[pos]:
+                            if char in possible[j]:
+                                possible[j].remove(char)
 
     return (puzzle, possible)
 
@@ -75,14 +70,11 @@ def bruteForce(puzzle):
     if pos < 0:
         return puzzle
 
-
+    
     min = 10
     for i in possible:
         if puzzle[i] == ".":
             s = len(possible[i])
-            if s == 1:
-                pos = i
-                break
             if s < min:
                 min = s
                 pos = i
@@ -161,8 +153,6 @@ if len(sys.argv) == 2:
         print("Puzzle {} completed in {} seconds.".format(count, delta))
     print()
     print("\n")
-
-    print(findPossible(puzzle))
 
 if len(sys.argv) == 1:
     fout = open("valid.txt", "w")
