@@ -1,4 +1,4 @@
-import sys, time, queue
+import sys, time
 
 boxes = {}
 for i in range(0, 81):
