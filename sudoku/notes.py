@@ -182,6 +182,11 @@ def makeDeductions(puzzle):
 
 [(pos1, sym1), (pos2, sym1), (pos1, sym2)]
 
+Writeup:
+Assume reader is an intelligent programmer who knows nothing about sudoku solving
+Detail the bruteforce routine, then go through deductions, data structure, etc
+2 PAGES 
+
 '''
 
 

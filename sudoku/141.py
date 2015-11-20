@@ -123,7 +123,7 @@ def showBoard(puzzle):
         i += 1
     print("```````````````````")
 
-file = open('sudoku.txt', 'r')
+file = open('sudoku141.txt', 'r')
 
 sudoku = {}
 i = 0
