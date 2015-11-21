@@ -178,7 +178,6 @@ if len(sys.argv) == 1:
         total += delta
 
         print("\n")
-        fout.write(solved + "\n")
 
 if len(sys.argv) == 3:
     total = 0
