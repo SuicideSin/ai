@@ -7,6 +7,8 @@ for line in file:
 
 import termios
 import contextlib
+import os
+import itertools
 
 
 @contextlib.contextmanager
@@ -20,32 +22,116 @@ def raw_mode(file):
     finally:
         termios.tcsetattr(file.fileno(), termios.TCSADRAIN, old_attrs)
 
-
 def main():
     word = ""
-    nums = "0123456789"
-    turn = 0
+    letters = [chr(i) for i in range(65,91)] + [chr(i) for i in range(97,123)]
+    nums = [str(num) for num in range(10)]
     numPlayers = 2
-    print('2 Player game started.')
-    print('Terminate with ctrl+C or ctrl+D.')
+    if len(sys.argv) > 1:
+        numPlayers = int(sys.argv[1])
+    ghost = "GHOST"
+    players = {str(i): 0 for i in range(1, numPlayers+1)}
+    playerCycle = sorted([str(i) for i in range(1, numPlayers+1)])
+    ejected = []
+    turn = 0
+    currPlayer = None
+    prevPlayer = None
+    winner = None
+    loser = None
+    print('{} Player game started.'.format(numPlayers))
+    print('Terminate with ctrl+C or ctrl+D. Press 0 to clear.')
+            
     with raw_mode(sys.stdin):
         try:
-            while True:
-                
+            while True:   
+                '''KeyLogger Stuff'''             
                 ch = sys.stdin.read(1)
                 if not ch or ch == chr(4):
                     break
-                    
-                if ch in nums and turn==0 and int(ch) > 2:
-                    numPlayers = int(ch)
-                    print("Game set to {} players.".format(numPlayers))
                 
-                if ch not in nums:
+                '''Ghost Logic'''
+                
+                if ch in players:
+                    challenger = ch
+                    if len(word) <= 3:
+                        print("Word must be longer than 3 letters in order to be challenged!")
+                        continue
+                    if word in words:
+                        players[currPlayer] = players[currPlayer] + 1
+                        print("Player {} challenges Player {}!".format(challenger, currPlayer))
+                        print("'{}' is a word.".format(word))
+                        print("Player {} loses and is now a {}.".format(currPlayer, ghost[:players[currPlayer]]))
+                        winner = challenger
+                        loser = currPlayer
+                    else:
+                        print("Player {} challenges Player {}!".format(challenger, currPlayer))
+                        counter = input("Player {}, please enter a word that begins with '{}': ".format(currPlayer, word))
+                        if counter in words:
+                            print("'{}' is a word.".format(counter))
+                            players[challenger] = players[challenger] + 1
+                            print("Player {} loses and is now a {}.".format(challenger, ghost[:players[challenger]]))
+                            winner = currPlayer
+                            loser = challenger
+                        else:
+                            print("'{}' is not a word.".format(counter))
+                            players[currPlayer] = players[currPlayer] + 1
+                            print("Player {} loses and is now a {}.".format(currPlayer, ghost[:players[currPlayer]]))
+                            winner = challenger
+                            loser = currPlayer
+                    if players[loser] == len(ghost):
+                        print("Player {} has been ejected!".format(loser))
+                        ejected.append(loser)
+                        del players[loser]
+                        playerCycle = sorted([str(i) for i in range(1, numPlayers+1) if str(i) not in ejected])
+                        
+                
+                if ch in letters:
+                    if winner != None:
+                        turn = int(winner)-1
+                        currPlayer = playerCycle[turn]
+                        turn += 1
+                        winner = None
+                    else:
+                        if turn > len(playerCycle) - 1:
+                            turn = 0
+                    
+                        currPlayer = playerCycle[turn]
+                        turn += 1
                     word = ''.join([word, ch])
-                    print(word)
-                if ch in nums and int(ch) == 0:
-                    print(chr(27) + "[2J")
-                turn += 1
+                    print("P{}>{}".format(currPlayer, word))
+                    
+                if ch == ".":
+                    options = []
+                    hints = set()
+                    for term in words:
+                        if word != term and word == term[:len(word)]:
+                            if term[:len(word)+1] not in words:
+                                options.append(term)
+                    for option in options:
+                        hints.add(option[len(word):len(word)+1])
+                    if len(hints) == 0:
+                        print("No hints! Starting new word.")
+                        word = ""
+                    else:
+                        print("H>{}".format(word+"."))
+                        print("Hints: {}".format(hints))
+
+                        
+                if ch == "0":
+                    word = ""
+                    ejected = []
+                    playerCycle = sorted([str(i) for i in range(1, numPlayers+1) if i not in ejected])
+                    print("Word reset.")
+                if ch== "`":
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                
+                if len(players) == 1:
+                    for player in players:
+                        assert player not in ejected
+                        print("Player {} wins!".format(player))
+                        sys.exit()
+                        
+
                 
         except (KeyboardInterrupt, EOFError):
             print("Game Terminated.")

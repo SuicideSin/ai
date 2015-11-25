@@ -16,9 +16,7 @@
         > cat    #waiting for next input
      
      
-     
-IDEAS:::
-    - Player class
+    
     
 '''
 
