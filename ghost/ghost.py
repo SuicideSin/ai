@@ -39,7 +39,7 @@ def main():
     winner = None
     loser = None
     print('{} Player game started.'.format(numPlayers))
-    print('Terminate with ctrl+C or ctrl+D. Press 0 to clear.')
+    print('Terminate with ctrl+C or ctrl+D. Press 0 to reset word and ` to clear screen..')
             
     with raw_mode(sys.stdin):
         try:
