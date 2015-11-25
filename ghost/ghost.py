@@ -1,6 +1,6 @@
 import sys
 
-file = open('ghost.txt', 'r')
+file = open('words.txt', 'r')
 words = []
 for line in file:
     words.append(line.rstrip('\n'))
@@ -56,6 +56,9 @@ def main():
                     if len(word) <= 3:
                         print("Word must be longer than 3 letters in order to be challenged!")
                         continue
+                    if challenger == currPlayer:
+                        print("You cannot challenge yourself.")
+                        continue
                     if word in words:
                         players[currPlayer] = players[currPlayer] + 1
                         print("Player {} challenges Player {}!".format(challenger, currPlayer))
@@ -66,18 +69,19 @@ def main():
                     else:
                         print("Player {} challenges Player {}!".format(challenger, currPlayer))
                         counter = input("Player {}, please enter a word that begins with '{}': ".format(currPlayer, word))
-                        if counter in words:
-                            print("'{}' is a word.".format(counter))
+                        if counter in words and len(counter) > len(word) and counter[:len(word)] == word:
+                            print("'{}' is valid.".format(counter))
                             players[challenger] = players[challenger] + 1
                             print("Player {} loses and is now a {}.".format(challenger, ghost[:players[challenger]]))
                             winner = currPlayer
                             loser = challenger
                         else:
-                            print("'{}' is not a word.".format(counter))
+                            print("'{}' is not valid.".format(counter))
                             players[currPlayer] = players[currPlayer] + 1
                             print("Player {} loses and is now a {}.".format(currPlayer, ghost[:players[currPlayer]]))
                             winner = challenger
                             loser = currPlayer
+                    word = ""
                     if players[loser] == len(ghost):
                         print("Player {} has been ejected!".format(loser))
                         ejected.append(loser)
@@ -87,7 +91,7 @@ def main():
                 
                 if ch in letters:
                     if winner != None:
-                        turn = int(winner)-1
+                        turn = playerCycle.index(winner)
                         currPlayer = playerCycle[turn]
                         turn += 1
                         winner = None
