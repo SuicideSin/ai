@@ -39,7 +39,7 @@ def main():
     winner = None
     loser = None
     print('{} Player game started.'.format(numPlayers))
-    print('Terminate with ctrl+C or ctrl+D. Press 0 to reset word and ` to clear screen..')
+    print('Terminate with ctrl+C or ctrl+D. Press 0 to reset word and ` to clear screen.')
             
     with raw_mode(sys.stdin):
         try:
@@ -53,7 +53,7 @@ def main():
                 
                 if ch in players:
                     challenger = ch
-                    if len(word) <= 3:
+                    if len(word) <= 3 and word in words:
                         print("Word must be longer than 3 letters in order to be challenged!")
                         continue
                     if challenger == currPlayer:
