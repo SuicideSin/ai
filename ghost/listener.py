@@ -23,8 +23,7 @@ def main():
                 ch = sys.stdin.read(1)
                 if not ch or ch == chr(4):
                     break
-                print('%02x' % ord(ch), end="")
-                print(ch)
+                print('%02x' % ord(ch))
                 print(str(ord(ch)))
         except (KeyboardInterrupt, EOFError):
             pass

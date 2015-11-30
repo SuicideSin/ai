@@ -58,6 +58,11 @@ def main():
                         print(ch, end="",flush=True)
                         response += ch
                         continue
+                    if ord(ch) == 0x7f:
+                        response = response[:len(response)-1]
+                        print("\b \b", end="", flush=True)
+                        continue
+                        
                     if ord(ch) == 0x0a:
                         print("\n",end="")
                         if response in words and len(response) > len(word) and response[:len(word)] == word:
