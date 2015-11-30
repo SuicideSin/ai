@@ -38,19 +38,44 @@ def main():
     prevPlayer = None
     winner = None
     loser = None
+    responding = False
+    response = ""
     print('{} Player game started.'.format(numPlayers))
     print('Terminate with ctrl+C or ctrl+D. Press 0 to reset word and ` to clear screen.')
-            
+
     with raw_mode(sys.stdin):
         try:
-            while True:   
-                '''KeyLogger Stuff'''             
+            while True:
+                '''KeyLogger Stuff'''
                 ch = sys.stdin.read(1)
                 if not ch or ch == chr(4):
                     break
-                
+
                 '''Ghost Logic'''
-                
+
+                if responding == True:
+                    if ch in letters:
+                        print(ch, end="",flush=True)
+                        response += ch
+                        continue
+                    if ord(ch) == 0x0a:
+                        print("\n",end="")
+                        if response in words and len(response) > len(word) and response[:len(word)] == word:
+                            print("'{}' is valid.".format(response))
+                            players[challenger] = players[challenger] + 1
+                            print("Player {} loses and is now a {}.".format(challenger, ghost[:players[challenger]]))
+                            winner = currPlayer
+                            loser = challenger
+                        else:
+                            print("'{}' is not valid.".format(response))
+                            players[currPlayer] = players[currPlayer] + 1
+                            print("Player {} loses and is now a {}.".format(currPlayer, ghost[:players[currPlayer]]))
+                            winner = challenger
+                            loser = currPlayer
+                        response = ""
+                        word = ""
+                        responding = False
+
                 if ch in players:
                     challenger = ch
                     if len(word) <= 3 and word in words:
@@ -66,30 +91,21 @@ def main():
                         print("Player {} loses and is now a {}.".format(currPlayer, ghost[:players[currPlayer]]))
                         winner = challenger
                         loser = currPlayer
+                        word = ""
                     else:
                         print("Player {} challenges Player {}!".format(challenger, currPlayer))
-                        counter = input("Player {}, please enter a word that begins with '{}': ".format(currPlayer, word))
-                        if counter in words and len(counter) > len(word) and counter[:len(word)] == word:
-                            print("'{}' is valid.".format(counter))
-                            players[challenger] = players[challenger] + 1
-                            print("Player {} loses and is now a {}.".format(challenger, ghost[:players[challenger]]))
-                            winner = currPlayer
-                            loser = challenger
-                        else:
-                            print("'{}' is not valid.".format(counter))
-                            players[currPlayer] = players[currPlayer] + 1
-                            print("Player {} loses and is now a {}.".format(currPlayer, ghost[:players[currPlayer]]))
-                            winner = challenger
-                            loser = currPlayer
-                    word = ""
-                    if players[loser] == len(ghost):
-                        print("Player {} has been ejected!".format(loser))
-                        ejected.append(loser)
-                        del players[loser]
-                        playerCycle = sorted([str(i) for i in range(1, numPlayers+1) if str(i) not in ejected])
-                        
-                
-                if ch in letters:
+                        print("Player {}, please enter a word that begins with '{}': ".format(currPlayer, word), end="",flush=True)
+                        responding = True
+
+                if loser is not None and players[loser] == len(ghost):
+                    print("Player {} has been ejected!".format(loser))
+                    ejected.append(loser)
+                    del players[loser]
+                    playerCycle = sorted([str(i) for i in range(1, numPlayers+1) if str(i) not in ejected])
+                    loser = None
+
+
+                elif ch in letters:
                     if winner != None:
                         turn = playerCycle.index(winner)
                         currPlayer = playerCycle[turn]
@@ -98,19 +114,19 @@ def main():
                     else:
                         if turn > len(playerCycle) - 1:
                             turn = 0
-                    
+
                         currPlayer = playerCycle[turn]
                         turn += 1
                     word = ''.join([word, ch])
                     print("P{}>{}".format(currPlayer, word))
-                    
-                if ch == ".":
+
+                elif ch == ".":
                     options = []
                     hints = set()
                     for term in words:
                         if word != term and word == term[:len(word)]:
-                            if term[:len(word)+1] not in words:
-                                options.append(term)
+                            #if term[:len(word)+1] not in words: #smart hint
+                            options.append(term)
                     for option in options:
                         hints.add(option[len(word):len(word)+1])
                     if len(hints) == 0:
@@ -120,23 +136,23 @@ def main():
                         print("H>{}".format(word+"."))
                         print("Hints: {}".format(hints))
 
-                        
-                if ch == "0":
+
+                elif ch == "0":
                     word = ""
                     ejected = []
                     playerCycle = sorted([str(i) for i in range(1, numPlayers+1) if i not in ejected])
                     print("Word reset.")
-                if ch== "`":
+                elif ch== "`":
                     os.system('cls' if os.name == 'nt' else 'clear')
-                
+
                 if len(players) == 1:
                     for player in players:
                         assert player not in ejected
                         print("Player {} wins!".format(player))
                         sys.exit()
-                        
 
-                
+
+
         except (KeyboardInterrupt, EOFError):
             print("Game Terminated.")
             pass
