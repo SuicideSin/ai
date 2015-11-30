@@ -58,7 +58,7 @@ def main():
                         print(ch, end="",flush=True)
                         response += ch
                         continue
-                    if ord(ch) == 0x7f:
+                    if ord(ch) == 0x7f and len(response) > 0:
                         response = response[:len(response)-1]
                         print("\b \b", end="", flush=True)
                         continue
