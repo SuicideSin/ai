@@ -1,15 +1,13 @@
 import sys
-
-file = open('words.txt', 'r')
-words = []
-for line in file:
-    words.append(line.rstrip('\n'))
-
 import termios
 import contextlib
 import os
 import itertools
 
+file = open('words.txt', 'r')
+words = []
+for line in file:
+    words.append(line.rstrip('\n'))
 
 @contextlib.contextmanager
 def raw_mode(file):
