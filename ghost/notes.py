@@ -21,4 +21,30 @@
 '''
 
 
+''''''''''''''''''''''''
+''''''Due Thurs''''''''
+'''''''''''''''''''''''
+Create a new file to do this one
+
+1. python3 ghost 2 c   #means that a computer joins the game
+   python3 ghost 2 c c 3 #means that the first 2 players are human, next 2 are computers, and the next 3 are people
+   
+   
+2. The computer will play and pick amongst the hints to play
+
+if the computer finds that it cannot play a word without losing, it should challenge
+   
+   
+
+
+
+
+
+
+
+
+
+
+
+
 
