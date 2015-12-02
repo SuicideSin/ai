@@ -26,8 +26,22 @@ def main():
     letters = [chr(i) for i in range(65,91)] + [chr(i) for i in range(97,123)]
     nums = [str(num) for num in range(10)]
     numPlayers = 2
+    computers = []
+    
     if len(sys.argv) > 1:
         numPlayers = int(sys.argv[1])
+    if len(sys.argv) > 2:
+        i = 1
+        args = [sys.argv[i] for i in range(1, len(sys.argv))]
+        numPlayers = len(args)
+        pos = 0
+        for i in args:
+            if i in nums:
+                pos += int(i)
+            if i == 'c':
+                pos += 1
+                computers.append(pos)
+        
     ghost = "GHOST"
     players = {str(i): 0 for i in range(1, numPlayers+1)}
     if numPlayers <= 6:
@@ -124,11 +138,11 @@ def main():
                     else:
                         if turn > len(playerCycle) - 1:
                             turn = 0
-
                         currPlayer = playerCycle[turn]
                         turn += 1
                     word = ''.join([word, ch])
-                    print("{}P{}>{}{}".format(playerColors[currPlayer], currPlayer, endColor, word))
+                    print("{}Player {}>{}{}".format(playerColors[currPlayer], currPlayer, endColor, word))
+                    if str(turn+1)
 
                 elif ch == ".":
                     options = []
