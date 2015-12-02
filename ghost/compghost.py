@@ -27,7 +27,7 @@ def main():
     nums = [str(num) for num in range(10)]
     numPlayers = 2
     computers = []
-    
+
     if len(sys.argv) > 1:
         numPlayers = int(sys.argv[1])
     if len(sys.argv) > 2:
@@ -40,16 +40,16 @@ def main():
                 pos += int(i)
             if i == 'c':
                 pos += 1
-                computers.append(pos)
-        
+                computers.append(str(pos))
+
     ghost = "GHOST"
     players = {str(i): 0 for i in range(1, numPlayers+1)}
     if numPlayers <= 6:
-        colors = ['\033[31m','\033[32m','\033[33m','\033[34m','\033[35m','\033[36m']
+        colors = ['\033[3{}m'.format(i) for i in range(1,7)]
         playerColors = {str(i): colors[i-1] for i in range(1, numPlayers+1)}
     else:
         playerColors = {str(i): '\033[0m' for i in range(1, numPlayers+1)}
-    endColor = '\033[0m' 
+    endColor = '\033[0m'
     playerCycle = sorted([str(i) for i in range(1, numPlayers+1)])
     ejected = []
     turn = 0
@@ -81,7 +81,7 @@ def main():
                         response = response[:len(response)-1]
                         print("\b \b", end="", flush=True)
                         continue
-                        
+
                     if ord(ch) == 0x0a:
                         print("\n",end="")
                         if response in words and len(response) > len(word) and response[:len(word)] == word:
@@ -102,6 +102,8 @@ def main():
 
                 if ch in players:
                     challenger = ch
+                    chalString = "{}Player {}{}".format(playerColors[challenger], challenger, endColor)
+                    currString = "{}Player {}{}".format(playerColors[currPlayer], currPlayer, endColor)
                     if len(word) <= 3 and word in words:
                         print("Word must be longer than 3 letters in order to be challenged!")
                         continue
@@ -110,15 +112,15 @@ def main():
                         continue
                     if word in words:
                         players[currPlayer] = players[currPlayer] + 1
-                        print("{}Player {}{} challenges {}Player {}{}!".format(playerColors[challenger], challenger, endColor, playerColors[currPlayer], currPlayer, endColor))
+                        print("{} challenges {}!".format(chalString, currString))
                         print("'{}' is a word.".format(word))
-                        print("{}Player {}{} loses and is now a {}{}{}.".format(playerColors[currPlayer], currPlayer, endColor, playerColors[currPlayer], ghost[:players[currPlayer]], endColor))
+                        print("{} loses and is now a {}{}{}.".format(currString, playerColors[currPlayer], ghost[:players[currPlayer]], endColor))
                         winner = challenger
                         loser = currPlayer
                         word = ""
                     else:
-                        print("{}Player {}{} challenges {}Player {}{}!".format(playerColors[challenger], challenger, endColor, playerColors[currPlayer], currPlayer, endColor))
-                        print("{}Player {}{}, please enter a word that begins with '{}': ".format(playerColors[currPlayer], currPlayer, endColor, word), end="",flush=True)
+                        print("{} challenges {}!".format(chalString, currString))
+                        print("{}, please enter a word that begins with '{}': ".format(currString, word), end="",flush=True)
                         responding = True
 
                 if loser is not None and players[loser] == len(ghost):
@@ -142,7 +144,86 @@ def main():
                         turn += 1
                     word = ''.join([word, ch])
                     print("{}Player {}>{}{}".format(playerColors[currPlayer], currPlayer, endColor, word))
-                    if str(turn+1)
+
+                    # #Computer checks if challenge can be made
+                    # MUST FIX WHEN A COMPUTER IS A WINNER AND PLAYS NEXT, CURRENTLY THE CMOPUTER WONT PLAY!!
+                    challenger = [i for i in playerCycle if i in computers][0]
+                    chalString = "{}Player {}{}".format(playerColors[challenger], challenger, endColor)
+                    currString = "{}Player {}{}".format(playerColors[currPlayer], currPlayer, endColor)
+                    if word in words and len(word) > 3:
+                        print("<INSERT CHALLENGE>")
+                        players[currPlayer] = players[currPlayer] + 1
+                        print("{} challenges {}!".format(chalString, currString))
+                        print("'{}' is a word.".format(word))
+                        print("{} loses and is now a {}{}{}.".format(currString, playerColors[currPlayer], ghost[:players[currPlayer]], endColor))
+                        winner = challenger
+                        loser = currPlayer
+                        word = ""
+                        continue
+                    contains = False
+                    for term in words:
+                        if word in term:
+                            contains = True
+                    if contains == False:
+                        print("<INSERT CHALLENGE>")
+                        continue
+
+                    #COMPUTER'S TURN!!!!
+                    nextTurn = turn
+                    if nextTurn> len(playerCycle) - 1:
+                        nextTurn = 0
+                    nextPlayer = playerCycle[nextTurn]
+
+                    if nextPlayer in computers:
+                        if turn > len(playerCycle) - 1:
+                            turn = 0
+                        currPlayer = playerCycle[turn]
+                        turn += 1
+                        options = []
+                        allChars = set()
+                        bestChars = set()
+
+                        goal = None
+                        bestChar = None
+                        alt = None
+
+                        for i in words:
+                            if word != i and word == i[:len(word)]:
+                                if i[:len(word)+1] not in words: #smart guess
+                                    options.append(i)
+                        if len(options) == 0:
+                            print("<INSERT CHALLENGE>")
+                            continue
+
+                        loser = 0
+                        pos = 0
+                        min = 1000
+                        max = 0
+                        for option in options:
+                            for i in range(len(option)):
+                                if pos > len(playerCycle) - 1:
+                                    pos = 0
+                                loser = playerCycle[pos]
+                                pos += 1
+                            if loser != currPlayer:
+                                bestChars.add(option[len(word):len(word)+1])
+                                if len(option) < min:
+                                    min = len(option)
+                                    goal = option
+                            allChars.add(option[len(word):len(word)+1])
+                            if len(option) > max:
+                                max = len(option)
+                                alt = option
+                        if goal is None:
+                            bestChar = alt[len(word):len(word)+1]
+                        else:
+                            bestChar = goal[len(word):len(word)+1]
+
+                        word = ''.join([word, bestChar])
+                        print("{}Computer {}>{}{}".format(playerColors[currPlayer], currPlayer, endColor, word))
+
+
+
 
                 elif ch == ".":
                     options = []
