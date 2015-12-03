@@ -33,8 +33,22 @@ Create a new file to do this one
 2. The computer will play and pick amongst the hints to play
 
 if the computer finds that it cannot play a word without losing, it should challenge
+'''
+
    
    
+''''''''''''''''''''''''''''
+'''''''Due Mon'''''''''''''
+'''''''''''''''''''''''''
+TRIES!!!!
+https://en.wikipedia.org/wiki/Trie
+
+Recursive function that makes the computer play perfectly
+
+
+
+
+
 
 
 

@@ -9,6 +9,41 @@ words = []
 for line in file:
     words.append(line.rstrip('\n'))
 
+def canForm(word):
+    global words
+    contains = False
+    for term in words:
+        if word in term:
+            contains = True
+    return contains
+    
+def best(word, options, currPlayer, playerCycle):
+    goal = None
+    alt = None
+    loser = 0
+    pos = 0
+    min = 1000
+    max = 0
+    for option in options:
+        for i in range(len(option)):
+            if pos > len(playerCycle) - 1:
+                pos = 0
+            loser = playerCycle[pos]
+            pos += 1
+        if loser != currPlayer:
+            #bestChars.add(option[len(word):len(word)+1])
+            if len(option) < min:
+                min = len(option)
+                goal = option
+        #allChars.add(option[len(word):len(word)+1])
+        if len(option) > max:
+            max = len(option)
+            alt = option
+    if goal is None:
+        bestChar = alt[len(word):len(word)+1]
+    else:
+        bestChar = goal[len(word):len(word)+1]
+    return bestChar
 
 @contextlib.contextmanager
 def raw_mode(file):
@@ -71,7 +106,7 @@ def main():
                     break
 
                 '''Ghost Logic'''
-
+                
                 if responding == True:
                     if ch in letters:
                         print(ch, end="",flush=True)
@@ -130,9 +165,15 @@ def main():
                     playerCycle = sorted([str(i) for i in range(1, numPlayers+1) if str(i) not in ejected])
                     loser = None
 
-
+                if winner != None:
+                    turn = playerCycle.index(winner)
+                    currPlayer = playerCycle[turn]
+                    turn += 1
+                    winner = None
+                    
                 elif ch in letters:
                     if winner != None:
+                        pass
                         turn = playerCycle.index(winner)
                         currPlayer = playerCycle[turn]
                         turn += 1
@@ -148,10 +189,9 @@ def main():
                     # #Computer checks if challenge can be made
                     # MUST FIX WHEN A COMPUTER IS A WINNER AND PLAYS NEXT, CURRENTLY THE CMOPUTER WONT PLAY!!
                     challenger = [i for i in playerCycle if i in computers][0]
-                    chalString = "{}Player {}{}".format(playerColors[challenger], challenger, endColor)
+                    chalString = "{}Computer {}{}".format(playerColors[challenger], challenger, endColor)
                     currString = "{}Player {}{}".format(playerColors[currPlayer], currPlayer, endColor)
                     if word in words and len(word) > 3:
-                        print("<INSERT CHALLENGE>")
                         players[currPlayer] = players[currPlayer] + 1
                         print("{} challenges {}!".format(chalString, currString))
                         print("'{}' is a word.".format(word))
@@ -160,12 +200,10 @@ def main():
                         loser = currPlayer
                         word = ""
                         continue
-                    contains = False
-                    for term in words:
-                        if word in term:
-                            contains = True
-                    if contains == False:
-                        print("<INSERT CHALLENGE>")
+                    if canForm(word) is False:
+                        print("{} challenges {}!".format(chalString, currString))
+                        print("{}, please enter a word that begins with '{}': ".format(currString, word), end="",flush=True)
+                        responding = True
                         continue
 
                     #COMPUTER'S TURN!!!!
@@ -173,51 +211,34 @@ def main():
                     if nextTurn> len(playerCycle) - 1:
                         nextTurn = 0
                     nextPlayer = playerCycle[nextTurn]
-
+                    
                     if nextPlayer in computers:
                         if turn > len(playerCycle) - 1:
                             turn = 0
+                        prevPlayer = currPlayer
                         currPlayer = playerCycle[turn]
                         turn += 1
-                        options = []
-                        allChars = set()
-                        bestChars = set()
-
-                        goal = None
-                        bestChar = None
-                        alt = None
-
-                        for i in words:
-                            if word != i and word == i[:len(word)]:
-                                if i[:len(word)+1] not in words: #smart guess
-                                    options.append(i)
-                        if len(options) == 0:
-                            print("<INSERT CHALLENGE>")
-                            continue
-
-                        loser = 0
-                        pos = 0
-                        min = 1000
-                        max = 0
-                        for option in options:
-                            for i in range(len(option)):
-                                if pos > len(playerCycle) - 1:
-                                    pos = 0
-                                loser = playerCycle[pos]
-                                pos += 1
-                            if loser != currPlayer:
-                                bestChars.add(option[len(word):len(word)+1])
-                                if len(option) < min:
-                                    min = len(option)
-                                    goal = option
-                            allChars.add(option[len(word):len(word)+1])
-                            if len(option) > max:
-                                max = len(option)
-                                alt = option
-                        if goal is None:
-                            bestChar = alt[len(word):len(word)+1]
+                        
+                        if word == "":
+                            bestChar = best(word, words, currPlayer, playerCycle)
                         else:
-                            bestChar = goal[len(word):len(word)+1]
+                            options = []
+                            for i in words:
+                                if word != i and word == i[:len(word)]:
+                                    if i[:len(word)+1] not in words: #smart guess
+                                        options.append(i)
+                            if len(options) == 0:
+                                #print("<INSERT CHALLENGE (LAST RESORT)>")
+                                challenger = currPlayer
+                                currPlayer = prevPlayer
+                                chalString = "{}Computer {}{}".format(playerColors[challenger], challenger, endColor)
+                                currString = "{}Player {}{}".format(playerColors[currPlayer], currPlayer, endColor)
+                                print("{} challenges {}!".format(chalString, currString))
+                                print("{}, please enter a word that begins with '{}': ".format(currString, word), end="",flush=True)
+                                responding = True
+                                continue
+                            
+                            bestChar = best(word, options, currPlayer, playerCycle)
 
                         word = ''.join([word, bestChar])
                         print("{}Computer {}>{}{}".format(playerColors[currPlayer], currPlayer, endColor, word))
@@ -262,5 +283,8 @@ def main():
             print("Game Terminated.")
             pass
 
-
-main()
+if len(sys.argv) > 1:
+    main()
+else:
+    import ghost
+    ghost.main()
