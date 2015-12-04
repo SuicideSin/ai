@@ -128,7 +128,7 @@ def main():
                         currPlayer = playerCycle[turn]
                         turn += 1
                     word = ''.join([word, ch])
-                    print("{}P{}>{}{}".format(playerColors[currPlayer], currPlayer, endColor, word))
+                    print("{}Player {}>{}{}".format(playerColors[currPlayer], currPlayer, endColor, word))
 
                 elif ch == ".":
                     options = []
