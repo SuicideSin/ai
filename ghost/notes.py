@@ -48,6 +48,30 @@ Recursive function that makes the computer play perfectly
 
 
 
+'''''''''''''''''''''''''''''''
+Making the computer smarter
+
+
+
+First off, probably want to use a Trie (a.k.a. Prefix tree)
+Second off, probably want to use recursion
+
+Recursive function returns a tuple of good (force win) and bad letters.
+    Function terminates if prefix is a word!!
+    Initialization:
+        Set of good letters and a set of bad letters, start off empty
+
+    Recursive part:
+        For each possible letter, recurse
+        Get back a temporary good set and a temporary bad set
+        
+        If temp good is empty, implies put possible letter in good
+        else its bad for us and put it in bad
+
+        return good and bad :)
+
+        this shit aint a freebie tho. big help tho. structure is given, but we have to implement it exactly.
+
 
 
 
