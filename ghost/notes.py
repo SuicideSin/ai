@@ -71,10 +71,40 @@ Recursive function returns a tuple of good (force win) and bad letters.
         return good and bad :)
 
         this shit aint a freebie tho. big help tho. structure is given, but we have to implement it exactly.
+        
 
+def analyze(prefix, playerNum):
+    if len(prefix) > 3 and prefix in wordList:
+        return ({prefix}, set())
+    good, bad = set(), set()
+    for possible in hint(prefix):
+        tryGood, tryBad = analyze(prefix + possible, playerNum[(playerNum.index(player) + 1)%len(players)])
+        if len(tryGood) > 0:
+            bad.add(possible)
+        else:
+            good.add(possible) 
+    return good, bad
 
+TRIES!!!
 
+def buildTrie( prefix, wordIterator ):
+    myDic = {}
+    for word in wordIterator:
+        
+        if prefix in wordIterator: myDic[''] = {}
+        
+        if len(word) < 4: continue
+        if word[:len(prefix)] != prefix: continue
+        if word[len(prefix)] not in myDic:
+            myDic[word[len(prefix)]] = set()
+        myDic[word[len(prefix)]].add(word)
+        for ltr in myDic:
+            myDic[ltr] = buildTrie(prefix + ltr, myDic[ltr])
+        
+        return myDic
 
+def analyze(prefix, playerNum, okayerCh)
+    if playerNum == 0
 
 
 
