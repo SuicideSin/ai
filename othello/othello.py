@@ -6,7 +6,7 @@ def display(board):
     print(border)
     for i in range(8):
         row = [board[j+8*i] for j in range(8)]
-        row = "{} | {} | {}".format(i, "  ".join(row), i)
+        row = "{} | {} | {}".format(i, "  ".join(row).upper(), i)
         print(row)
     print(border)
     cols = [str(i) for i in range(8)]
