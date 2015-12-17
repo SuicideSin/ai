@@ -14,7 +14,7 @@ def display(*args):
     if len(args) ==3:
         for i in args[1]:
             board[i] = '\033[32m' + args[2] + '\033[0m'
-            
+
     border = ["-" for i in range(24)]
     border = "   {}".format("".join(border))
     print(border)
@@ -42,8 +42,8 @@ if len(sys.argv) == 2:
 def findPossible(board, pos, origin, path, possible):
     global cellNeighbors, cellStraights, oppositeSide
 
-    opposite = oppositeSide[board[origin]]      
-    
+    opposite = oppositeSide[board[origin]]
+
     if pos is None:
         if opposite not in board:
             return
@@ -51,7 +51,7 @@ def findPossible(board, pos, origin, path, possible):
             if board[pos] == opposite:
                 path[pos] = origin
                 findPossible(board, pos, origin, path, possible)
-                
+
     elif board[pos] == "." and board[path[pos]] == opposite:
         possible.add(pos)
         return
@@ -66,11 +66,14 @@ if len(sys.argv) == 3:
     board = sys.argv[1].upper()
     sidePos = [i for i in range(len(board)) if board[i]==side]
     display(board)
+    total = set()
     for pos in sidePos:
         possible = set()
+
         findPossible(board, None, pos, {}, possible)
+        total = total | possible
         print(coord(pos))
         for pos in sorted(possible):
             print('\t{}'.format(coord(pos)))
-    
-    display(board, possible, side)
+
+    display(board, total, side)
