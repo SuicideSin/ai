@@ -9,24 +9,12 @@ oppositeSide = {"X": "O", "O":"X"}
 def coord(position):
     return(int(pos/8), pos%8)
 
-def display(board):
-    border = ["-" for i in range(24)]
-    border = "   {}".format("".join(border))
-    print(border)
-    for i in range(8):
-        row = [board[j+8*i] for j in range(8)]
-        row = "{} | {} | {}".format(i, "  ".join(row), i)
-        print(row)
-    print(border)
-    cols = [str(i) for i in range(8)]
-    cols = "{}  {}".format("  ", "  ".join(cols))
-    print(cols)
-
-def colorize(board, possible):
-    color = {i: board[i] for i in range(len(board))}
-    for i in possible:
-        color[i] = '\033[32m' + side + '\033[0m'
-    board = color 
+def display(*args):
+    board = {i: args[0][i] for i in range(len(args[0]))}
+    if len(args) ==3:
+        for i in args[1]:
+            board[i] = '\033[32m' + args[2] + '\033[0m'
+            
     border = ["-" for i in range(24)]
     border = "   {}".format("".join(border))
     print(border)
@@ -85,4 +73,4 @@ if len(sys.argv) == 3:
         for pos in sorted(possible):
             print('\t{}'.format(coord(pos)))
     
-    colorize(board, possible)
+    display(board, possible, side)
