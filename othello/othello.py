@@ -1,8 +1,13 @@
 import sys
 
-cellNeighbors = {i: {j for j in range(64) if j!=i and (j==i+8 or j==i-8 or j==i-1 or j==i+1 or j==i+9 or j==i+7 or j==i-9 or j==i-7) } for i in range(64)}
-cellStraights = {i: {j for j in range(64) if j!=i and (j%8==i%8 or int(j/8) == int(i/8))} for i in range(64)}
-opposite = {"X": "O", "O":"X"}
+cellNeighbors = {i: {j for j in range(64) if j!=i and (abs(int(j/8)-int(i/8)) <= 1 and abs((j%8)-(i%8)) <= 1) } for i in range(64)}
+
+cellStraights = {i: {j for j in range(64) if j!=i and (int(j/8)==int(i/8) or (j%8)==(i%8) or ((abs(int(j/8)-int(i/8)) == abs((j%8)-(i%8)))))} for i in range(64)}
+
+oppositeSide = {"X": "O", "O":"X"}
+
+def coord(position):
+    return(int(pos/8), pos%8)
 
 def display(board):
     border = ["-" for i in range(24)]
@@ -10,13 +15,29 @@ def display(board):
     print(border)
     for i in range(8):
         row = [board[j+8*i] for j in range(8)]
-        row = "{} | {} | {}".format(i, "  ".join(row).upper(), i)
+        row = "{} | {} | {}".format(i, "  ".join(row), i)
         print(row)
     print(border)
     cols = [str(i) for i in range(8)]
     cols = "{}  {}".format("  ", "  ".join(cols))
     print(cols)
 
+def colorize(board, possible):
+    color = {i: board[i] for i in range(len(board))}
+    for i in possible:
+        color[i] = '\033[32m' + side + '\033[0m'
+    board = color 
+    border = ["-" for i in range(24)]
+    border = "   {}".format("".join(border))
+    print(border)
+    for i in range(8):
+        row = [board[j+8*i] for j in range(8)]
+        row = "{} | {} | {}".format(i, "  ".join(row), i)
+        print(row)
+    print(border)
+    cols = [str(i) for i in range(8)]
+    cols = "{}  {}".format("  ", "  ".join(cols))
+    print(cols)
 
 if len(sys.argv) == 2:
     if len(sys.argv[1]) == 64:
@@ -30,56 +51,38 @@ if len(sys.argv) == 2:
         if valid:
             display(board)
 
-def findPossible(board, pos, origin, side):
-    global cellNeighbors
-    global possible
+def findPossible(board, pos, origin, path, possible):
+    global cellNeighbors, cellStraights, oppositeSide
 
-    opposite = opposite[side]
-           
+    opposite = oppositeSide[board[origin]]      
+    
     if pos is None:
         if opposite not in board:
-            return ""
+            return
         for pos in cellNeighbors[origin]:
             if board[pos] == opposite:
-                return findPossible(board, pos, origin, side)
-    
-    if board[pos] == ".":
-        possible.append(pos)
-        return ""
-
+                path[pos] = origin
+                findPossible(board, pos, origin, path, possible)
+                
+    elif board[pos] == "." and board[path[pos]] == opposite:
+        possible.add(pos)
+        return
     else:
         for i in cellNeighbors[pos]:
-            pass 
-
+            if i not in path and i in cellStraights[origin]:
+                path[i] = pos
+                findPossible(board, i, origin, path, possible)
 
 if len(sys.argv) == 3:
     side = sys.argv[2].upper()
     board = sys.argv[1].upper()
     sidePos = [i for i in range(len(board)) if board[i]==side]
-    possible = []
     display(board)
     for pos in sidePos:
-        findPossible(board, None, pos, side)
-    print(possible)
-
+        possible = set()
+        findPossible(board, None, pos, {}, possible)
+        print(coord(pos))
+        for pos in sorted(possible):
+            print('\t{}'.format(coord(pos)))
     
-#print(cellNeighbors)
-print(cellStraights)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#eof
+    colorize(board, possible)
