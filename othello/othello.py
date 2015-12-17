@@ -107,16 +107,19 @@ def findPossible(board, pos, origin, visited, path, possible):
 if len(sys.argv) == 3:
     side = sys.argv[2].upper()
     board = sys.argv[1].upper()
-    sidePos = [i for i in range(len(board)) if board[i]==side]
-    display(board)
-    total = set()
-    for pos in sidePos:
-        possible = set()
-        findPossible(board, None, pos, {}, {}, possible)
-        total = total | possible
-        print("Origin: {}".format(coord(pos)))
-        print("Endpoints:")
-        for pos in sorted(possible):
-            print('\t{}'.format(coord(pos)))
-        print()
-    display(board, total, side)
+    if len(board) > 64:
+        print("Input board is too long.")
+    else:
+        sidePos = [i for i in range(len(board)) if board[i]==side]
+        display(board)
+        total = set()
+        for pos in sidePos:
+            possible = set()
+            findPossible(board, None, pos, {}, {}, possible)
+            total = total | possible
+            print("Origin: {}".format(coord(pos)))
+            print("Possibilities:")
+            for pos in sorted(possible):
+                print('\t{}'.format(coord(pos)))
+            print()
+        display(board, total, side)

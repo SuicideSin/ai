@@ -39,3 +39,22 @@ For Tuesday (12/15) implement board printout
 For Thurday (12/17) 
     make a global dictionary which given a board index, will return the set of neighbor positions
     Given a board and character, print out the possible moves
+
+
+
+For Tuesday of next year
+1. Have a moderator for 2 person othello game
+    - Start with xo board
+                 ox 
+    - Should accept moves in the "row col" format (comma can be placed but doesnt have to be)
+    - Should display resultant board with flipped pieces
+    - when both players must pass, moderator ends game and calculates winner
+    - Moderator should determine if player must pass. If player passes, moderator displays a            message.
+2. Allow a human vs computer game
+3. Mystery assignment
+4. Computer vs. Self
+5. Build in smarts
+
+'''
+
+
