@@ -55,6 +55,7 @@ def findPossible(board, pos, origin, path, possible):
     elif board[pos] == "." and board[path[pos]] == opposite:
         possible.add(pos)
         return
+    '''Needs to commit to a direction!!! Cant't be in any direction of the origin, must go in the same direction as the previous one'''
     else:
         for i in cellNeighbors[pos]:
             if i not in path and i in cellStraights[origin]:
@@ -69,7 +70,6 @@ if len(sys.argv) == 3:
     total = set()
     for pos in sidePos:
         possible = set()
-
         findPossible(board, None, pos, {}, possible)
         total = total | possible
         print(coord(pos))
