@@ -45,6 +45,10 @@ def coord(position):
 def display(*args):
     board = {i: args[0][i] for i in range(len(args[0]))}
 
+    if len(args) == 3:
+        for i in args[1]:
+            board[i] = '\033[32m' + args[2] + '\033[0m'
+
     for i in board:
         if board[i] == "X":
             board[i] = '\033[36mX\033[0m'
@@ -132,12 +136,12 @@ while canMove:
     while invalid:
         coords = input("{}, please enter a move in \"r c\" format: ".format(side))
         move = [int(coords[i]) for i in range(len(coords)) if coords[i] != "," and coords[i] != " "]
-        position = move[0] * 8 + move[1]
-        if position in possible[side]:
-            movePos = position
-            invalid = False
-        else:
-            print("Invalid move. Try again.")
+        if len(move) == 2:
+            position = move[0] * 8 + move[1]
+            if position in possible[side]:
+                movePos = position
+                invalid = False
+        print("Invalid move. Try again.")
 
     board = board[:movePos] + side + board[movePos+1:]
     flip = set()
