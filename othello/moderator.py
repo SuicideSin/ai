@@ -44,9 +44,12 @@ def coord(position):
 
 def display(*args):
     board = {i: args[0][i] for i in range(len(args[0]))}
-    if len(args) ==3:
-        for i in args[1]:
-            board[i] = '\033[32m' + args[2] + '\033[0m'
+
+    for i in board:
+        if board[i] == "X":
+            board[i] = '\033[36mX\033[0m'
+        elif board[i] == "O":
+            board[i] = '\033[33mO\033[0m'
 
     border = ["-" for i in range(24)]
     border = "   {}".format("".join(border))
@@ -59,13 +62,14 @@ def display(*args):
     cols = [str(i) for i in range(8)]
     cols = "{}  {}".format("  ", "  ".join(cols))
     print(cols)
-    
+
 def findPossible(board, pos, origin, visited, path, possible):
     global cellNeighbors, cellPaths, oppositeSide #, cellStraights
 
     opposite = oppositeSide[board[origin]]
 
     if pos is None:
+        visited[origin] = None
         if opposite not in board:
             return
         for pos in cellNeighbors[origin]:
@@ -86,48 +90,78 @@ def findPossible(board, pos, origin, visited, path, possible):
                 visited[i] = pos
                 findPossible(board, i, origin, visited, path, possible)
 
-def packPossible(board):
+def packPossible(board, side):
+    paths = []
+
     xPossible = set()
-    xPos = {i for i in len(board) if board[i] == "X"}
+    xPos = {i for i in range(len(board)) if board[i] == "X"}
     for pos in xPos:
         findPossible(board, None, pos, {}, {}, xPossible)
     oPossible = set()
-    oPos = {i for i in len(board) if board[i] == "O"}
+    oPos = {i for i in range(len(board)) if board[i] == "O"}
     for pos in oPos:
         findPossible(board, None, pos, {}, {}, oPossible)
-    
+
+    for i in range(len(board)):
+        if board[i] == side:
+            path = {}
+            findPossible(board, None, i, path, {}, set())
+            paths.append(path)
+
+    return (xPossible,oPossible, paths)
+
 display(board)
-turn = input("Please enter the first player: ")
+#side = input("Please enter the first player: ")
+side = "X"
 canMove = True
 while canMove:
-    xPossible, oPossible = packPossible(board)
-    
-    if len(xPossible) == 0 and len(oPossible) == 0:
+    possible = {}
+    possible['X'], possible['O'], paths = packPossible(board, side)
+    opposite = oppositeSide[side]
+
+    if len(possible['X']) == 0 and len(possible['O']) == 0:
         canMove = False
         continue
-        
-    if turn == "X" and len(xPossible) == 0:
-        print("No possible moves for X. Turn passed.")
+
+    if len(possible[side]) == 0:
+        print("{} cannot move.".format(side))
         continue
-    if turn == "O" and len(oPossible) == 0:
-        print("No possible moves for O. Turn passed.")
-        continue
-    
-    invalid = True:
+
+    invalid = True
+    movePos = 0
     while invalid:
-        position = input("{}, please enter a move in r c format.")
+        coords = input("{}, please enter a move in \"r c\" format: ".format(side))
+        move = [int(coords[i]) for i in range(len(coords)) if coords[i] != "," and coords[i] != " "]
+        position = move[0] * 8 + move[1]
+        if position in possible[side]:
+            movePos = position
+            invalid = False
+        else:
+            print("Invalid move. Try again.")
+
+    board = board[:movePos] + side + board[movePos+1:]
+    flip = set()
+    for path in paths:
+        if movePos in path:
+            parent = path[movePos]
+            while parent is not None:
+                flip.add(parent)
+                parent = path[parent]
+    for pos in flip:
+        board = board[:pos] + side + board[pos+1:]
 
 
-xc = 0
-oc = 0
-for i in board:
-    if i=="X":
-        xc += 1
-    if i=="O":
-        oc += 1
+
+    display(board)
+    side = opposite
+
+
+xc = board.count("X")
+oc = board.count("O")
+
 if xc > oc:
-    print("X wins  {} to {}.".format(xc, oc))
-if oc > xc:
-    print("O wins  {} to {}.".format(oc, xc))
-else:
+    print("X wins {} to {}.".format(xc, oc))
+elif oc > xc:
+    print("O wins {} to {}.".format(oc, xc))
+elif xc == oc:
     print("No winner. Both players scored {}.".format(xc))
