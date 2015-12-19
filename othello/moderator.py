@@ -1,5 +1,5 @@
 import sys
-board = "...........................XO......OX..........................."
+board = "...........................OX......XO..........................."
 
 cellNeighbors = {i: {j for j in range(64) if j!=i and (abs(int(j/8)-int(i/8)) <= 1 and abs((j%8)-(i%8)) <= 1) } for i in range(64)}
 cellPaths = {}
@@ -131,17 +131,21 @@ while canMove:
         print("{} cannot move.".format(side))
         continue
 
+    print("====== {}'s Turn ======".format(side))
     invalid = True
     movePos = 0
     while invalid:
-        coords = input("{}, please enter a move in \"r c\" format: ".format(side))
-        move = [int(coords[i]) for i in range(len(coords)) if coords[i] != "," and coords[i] != " "]
+        coords = input("Please enter a move in row, col format: ")
+        move = [int(coords[i]) for i in range(len(coords)) if coords[i] in "12345670"]
         if len(move) == 2:
             position = move[0] * 8 + move[1]
             if position in possible[side]:
                 movePos = position
                 invalid = False
-        print("Invalid move. Try again.")
+            else:
+                print("Invalid move. Try again.")
+        else:
+            print("Invalid move. Try again.")
 
     board = board[:movePos] + side + board[movePos+1:]
     flip = set()
