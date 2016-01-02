@@ -129,6 +129,7 @@ while canMove:
 
     if len(possible[side]) == 0:
         print("{} cannot move.".format(side))
+        side = opposite
         continue
 
     print("====== {}'s Turn ======".format(side))
