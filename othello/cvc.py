@@ -137,7 +137,6 @@ def negascout(board, depth, alpha, beta, side):
     return alpha
 
 display(board)
-player = input("Please choose a side (X or O): ").upper()
 side = 'X'
 canMove = True
 while canMove:
@@ -153,35 +152,17 @@ while canMove:
         print("{} cannot move.".format(side))
         side = opposite
         continue
-
     print("====== {}'s Turn ======".format(side))
-    if side == player:
-        invalid = True
-        movePos = 0
-        while invalid:
-            coords = input("Please enter a move in row, col format: ")
-            move = [int(coords[i]) for i in range(len(coords)) if coords[i] in "01234567"]
-            if len(move) == 2:
-                position = move[0] * 8 + move[1]
-                if position in possible[side]:
-                    movePos = position
-                    invalid = False
-                else:
-                    print("Invalid move. Try again.")
-            else:
-                print("Invalid move. Try again.")
-    
-    else: #Computer's turn
-        negas = {}
-        for pos in possible[side]:
-            child = board[:pos] + side + board[pos+1:]
-            negas[pos] = negascout(child, 4, float("-inf"), float("inf"), side)
-        maximum = float("-inf")
-        for pos in negas:
-            if negas[pos] > maximum:
-                maximum = negas[pos]
-                maxpos = pos
-        movePos = maxpos   
+    negas = {}
+    for pos in possible[side]:
+        child = board[:pos] + side + board[pos+1:]
+        negas[pos] = negascout(child, 2, float("-inf"), float("inf"), side)
+    maximum = float("-inf")
+    for pos in negas:
+        if negas[pos] > maximum:
+            maximum = negas[pos]
+            maxpos = pos
+    movePos = maxpos   
 
     board = board[:movePos] + side + board[movePos+1:]
     flip = set()

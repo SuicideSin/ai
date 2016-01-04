@@ -1,4 +1,4 @@
-import sys
+import sys, time
 
 cellNeighbors = {i: {j for j in range(64) if j!=i and (abs(int(j/8)-int(i/8)) <= 1 and abs((j%8)-(i%8)) <= 1) } for i in range(64)}
 
@@ -110,6 +110,7 @@ if len(sys.argv) == 3:
     if len(board) > 64:
         print("Input board is too long.")
     else:
+        start = time.clock()
         sidePos = [i for i in range(len(board)) if board[i]==side]
         display(board)
         total = set()
@@ -123,3 +124,4 @@ if len(sys.argv) == 3:
                 print('\t{}'.format(coord(pos)))
             print()
         display(board, total, side)
+        print("Completed in %f seconds." % (time.clock()-start))
