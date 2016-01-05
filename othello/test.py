@@ -124,20 +124,30 @@ def negascout(board, depth, alpha, beta, side):
     first = True
     for pos in possible[side]:
         child = board[:pos] + side + board[pos+1:]
+        row = int(pos/8)
+        col = pos%8
+        weighting = 0
+        if pos == 0 or pos == 7 or pos == 56 or pos == 63:
+            weighting = 10
+        elif row == 0 or row == 7 or col == 0 or col == 7:
+            weighting = 5
+        if pos in {1, 8, 6, 15, 48, 57, 62, 55}:
+            weighting = -5
+        if pos == 9 or pos == 14 or pos == 49 or pos == 54:
+            weighting = -10
         if first == True:
             first = False
-            score = -negascout(child, depth-1, -alpha-1, -alpha, opposite)
+            score = -negascout(child, depth-1, -alpha-1, -alpha, opposite) + weighting
             if alpha < score < beta:
-                score = -negascout(child, depth-1, -beta, -alpha, opposite)
+                score = -negascout(child, depth-1, -beta, -alpha, opposite) + weighting
         else:
-            score = -negascout(child, depth-1, -beta, -alpha, opposite)
+            score = -negascout(child, depth-1, -beta, -alpha, opposite) + weighting
         alpha = max(alpha, score)
         if beta < alpha:
             break
     return alpha
 
 display(board)
-player = input("Please choose a side (X or O): ").upper()
 side = 'X'
 canMove = True
 while canMove:
@@ -153,38 +163,17 @@ while canMove:
         print("{} cannot move.".format(side))
         side = opposite
         continue
-
     print("====== {}'s Turn ======".format(side))
-    if side == player:
-        invalid = True
-        movePos = 0
-        while invalid:
-            response = input("Please enter a move in row, col format: ")
-            move = [int(response[i]) for i in range(len(response)) if response[i] in "1234567890"]
-            if (' ' or ',' in response) and len(move) == 2 and len(response) > 2:
-                #print(len(response))
-                position = move[0] * 8 + move[1]
-            elif len(response) == 2 and len(move) == 2:
-                position = int(response)
-            else:
-                print("Invalid move. Try again.")
-            if position in possible[side]:
-                movePos = position
-                invalid = False
-            else:
-                print("Invalid move. Try again.")
-    
-    else: #Computer's turn
-        negas = {}
-        for pos in possible[side]:
-            child = board[:pos] + side + board[pos+1:]
-            negas[pos] = negascout(child, 4, float("-inf"), float("inf"), side)
-        maximum = float("-inf")
-        for pos in negas:
-            if negas[pos] > maximum:
-                maximum = negas[pos]
-                maxpos = pos
-        movePos = maxpos   
+    negas = {}
+    for pos in possible[side]:
+        child = board[:pos] + side + board[pos+1:]
+        negas[pos] = negascout(child, 3, float("-inf"), float("inf"), side)
+    maximum = float("-inf")
+    for pos in negas:
+        if negas[pos] > maximum:
+            maximum = negas[pos]
+            maxpos = pos
+    movePos = maxpos   
 
     board = board[:movePos] + side + board[movePos+1:]
     flip = set()
@@ -211,4 +200,4 @@ if xc > oc:
 elif oc > xc:
     print("O wins {} to {}.".format(oc, xc))
 elif xc == oc:
-    print("No winner. Both players scored {}.".format(xc))
+    print("Game tied. Both players scored {}.".format(xc))

@@ -136,15 +136,18 @@ while canMove:
     invalid = True
     movePos = 0
     while invalid:
-        coords = input("Please enter a move in row, col format: ")
-        move = [int(coords[i]) for i in range(len(coords)) if coords[i] in "12345670"]
-        if len(move) == 2:
+        response = input("Please enter a move in row, col format: ")
+        move = [int(response[i]) for i in range(len(response)) if response[i] in "1234567890"]
+        if (' ' or ',' in response) and len(move) == 2 and len(response) > 2:
+            #print(len(response))
             position = move[0] * 8 + move[1]
-            if position in possible[side]:
-                movePos = position
-                invalid = False
-            else:
-                print("Invalid move. Try again.")
+        elif len(response) == 2 and len(move) == 2:
+            position = int(response)
+        else:
+            print("Invalid move. Try again.")
+        if position in possible[side]:
+            movePos = position
+            invalid = False
         else:
             print("Invalid move. Try again.")
 
