@@ -14,8 +14,13 @@ for i in range(64):
         jcol = j%8
         irow = int(i/8)
         icol = i%8
+        
+        if j == i:
+            for k in range(8):
+                paths[k].append(j);
+        
         #same row to the left
-        if jrow == irow and jcol < icol:
+        elif jrow == irow and jcol < icol:
             paths[0].append(j)
         #same row to the right
         elif jrow == irow and jcol > icol:
@@ -78,31 +83,22 @@ if len(sys.argv) == 2:
         if valid:
             display(board)
 
-def findPossible(board, pos, origin, visited, path, possible):
-    global cellNeighbors, cellPaths, oppositeSide #, cellStraights
+def findPossible(board, side):
+    global cellPaths, oppositeSide
 
-    opposite = oppositeSide[board[origin]]
-
-    if pos is None:
-        if opposite not in board:
-            return
-        for pos in cellNeighbors[origin]:
-            if board[pos] == opposite:
-                visited[pos] = origin
-                path = []
-                for route in cellPaths[origin]:
-                    if pos in route:
-                        path = route
-                findPossible(board, pos, origin, visited, path, possible)
-
-    elif board[pos] == "." and board[visited[pos]] == opposite:
-        possible.add(pos)
-        return
-    else:
-        for i in cellNeighbors[pos]:
-            if i not in visited and i in path:
-                visited[i] = pos
-                findPossible(board, i, origin, visited, path, possible)
+    opposite = oppositeSide[side]
+    possible = set()
+    sidePos = {pos for pos in range(64) if board[pos] == side}
+    for pos in sidePos:
+        for path in cellPaths[pos]:
+            index = 1
+            if board[path[0]] != side:
+                path = path[::-1]
+            if board[path[index]] == opposite and '.' in [board[path[i]] for i in range(1, len(path))]:
+                while board[path[index]] == opposite:
+                    index += 1
+                possible.add(path[index])
+    return possible
 
 if len(sys.argv) == 3:
     side = sys.argv[2].upper()
@@ -110,18 +106,10 @@ if len(sys.argv) == 3:
     if len(board) > 64:
         print("Input board is too long.")
     else:
-        start = time.clock()
-        sidePos = [i for i in range(len(board)) if board[i]==side]
         display(board)
-        total = set()
-        for pos in sidePos:
-            possible = set()
-            findPossible(board, None, pos, {}, {}, possible)
-            total = total | possible
-            print("Origin: {}".format(coord(pos)))
-            print("Possibilities:")
-            for pos in sorted(possible):
-                print('\t{}'.format(coord(pos)))
-            print()
-        display(board, total, side)
-        print("Completed in %f seconds." % (time.clock()-start))
+        start = time.clock()
+        possible = findPossible(board, side)
+        total = time.clock()-start
+        print(possible)
+        display(board, possible, side)
+        print("Completed in %f seconds." % (total))

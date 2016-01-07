@@ -55,6 +55,22 @@ For Tuesday of next year
 4. Computer vs. Self
 5. Build in smarts
 
+
+
+
+For the contest, you get half a second to a second to move. Excess time can be put forward into the next move.
+
+Entering an illegal move will carry a half point or point deduction.
+
+400 MB limit -- TRANSPOSITION TABLES!
+
+
+Ideas for computer:
+    - Zobrist hashing
+    - Transposition tables (400 MB, that's a lot!)
+    - Implement mtd-f search
+    - 
+
 '''
 
 

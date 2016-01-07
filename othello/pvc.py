@@ -136,6 +136,11 @@ def negascout(board, depth, alpha, beta, side):
             break
     return alpha
 
+if len(sys.argv) > 1:
+    depth = int(sys.argv[1])
+else:
+    depth = 3
+
 display(board)
 player = input("Please choose a side (X or O): ").upper()
 side = 'X'
@@ -178,7 +183,7 @@ while canMove:
         negas = {}
         for pos in possible[side]:
             child = board[:pos] + side + board[pos+1:]
-            negas[pos] = negascout(child, 4, float("-inf"), float("inf"), side)
+            negas[pos] = negascout(child, depth, float("-inf"), float("inf"), side)
         maximum = float("-inf")
         for pos in negas:
             if negas[pos] > maximum:
