@@ -1,7 +1,6 @@
 import sys
 board = "...........................OX......XO..........................."
 
-cellNeighbors = {i: {j for j in range(64) if j!=i and (abs(int(j/8)-int(i/8)) <= 1 and abs((j%8)-(i%8)) <= 1) } for i in range(64)}
 cellPaths = {}
 for i in range(64):
     paths = [[] for j in range(8)]
@@ -10,6 +9,7 @@ for i in range(64):
         jcol = j%8
         irow = int(i/8)
         icol = i%8
+        
         #same row to the left
         if jrow == irow and jcol < icol:
             paths[0].append(j)
@@ -22,7 +22,7 @@ for i in range(64):
         #same col downward
         elif jcol == icol and jrow < irow:
             paths[3].append(j)
-        #diagonals
+        #diagonal
         elif abs(jrow - irow) == abs(jcol - icol):
             #NW
             if jrow < irow and jcol < icol:
@@ -36,7 +36,13 @@ for i in range(64):
             #SE
             if jrow > irow and jcol > icol:
                 paths[7].append(j)
-    cellPaths[i] = paths
+        paths = [path for path in paths if path]
+    for path in paths:
+        path = sorted(path)
+        if i > path[0]:
+            path = path[::-1]
+    cellPaths[i] = paths    
+
 oppositeSide = {"X": "O", "O":"X"}
 
 def coord(position):
@@ -67,56 +73,27 @@ def display(*args):
     cols = "{}  {}".format("  ", "  ".join(cols))
     print(cols)
 
-def findPossible(board, pos, origin, visited, path, possible):
-    global cellNeighbors, cellPaths, oppositeSide #, cellStraights
+def findPossible(board, side):
+    global cellPaths, oppositeSide
 
-    opposite = oppositeSide[board[origin]]
-
-    if pos is None:
-        visited[origin] = None
-        if opposite not in board:
-            return
-        for pos in cellNeighbors[origin]:
-            if board[pos] == opposite:
-                visited[pos] = origin
-                path = []
-                for route in cellPaths[origin]:
-                    if pos in route:
-                        path = route
-                findPossible(board, pos, origin, visited, path, possible)
-
-    elif board[pos] == "." and board[visited[pos]] == opposite:
-        possible.add(pos)
-        return
-    else:
-        for i in cellNeighbors[pos]:
-            if i not in visited and i in path:
-                visited[i] = pos
-                findPossible(board, i, origin, visited, path, possible)
-
-def packPossible(board, side):
-    paths = []
-
-    xPossible = set()
-    xPos = {i for i in range(len(board)) if board[i] == "X"}
-    for pos in xPos:
-        findPossible(board, None, pos, {}, {}, xPossible)
-    oPossible = set()
-    oPos = {i for i in range(len(board)) if board[i] == "O"}
-    for pos in oPos:
-        findPossible(board, None, pos, {}, {}, oPossible)
-
-    for i in range(len(board)):
-        if board[i] == side:
-            path = {}
-            findPossible(board, None, i, path, {}, set())
-            paths.append(path)
-
-    return (xPossible,oPossible, paths)
+    opposite = oppositeSide[side]
+    possible = set()
+    sidePos = {pos for pos in range(64) if board[pos] == side}
+    for pos in sidePos:
+        for path in cellPaths[pos]:
+            index = 1
+            # if board[path[0]] != side:
+            #     path = path[::-1]
+            if board[path[index]] == opposite and '.' in [board[path[i]] for i in range(1, len(path))]:
+                while board[path[index]] == opposite:
+                    index += 1
+                possible.add(path[index])
+    return possible
 
 def negascout(board, depth, alpha, beta, side):
     possible = {}
-    possible['X'], possible['O'], paths = packPossible(board, side)
+    possible['X'] = findPossible(board, 'X')
+    possible['O'] = findPossible(board, 'O')
     opposite = oppositeSide[side]
 
     if depth == 0 or (len(possible['X']) == 0 and len(possible['O']) == 0):
@@ -141,7 +118,8 @@ side = 'X'
 canMove = True
 while canMove:
     possible = {}
-    possible['X'], possible['O'], paths = packPossible(board, side)
+    possible['X'] = findPossible(board, 'X')
+    possible['O'] = findPossible(board, 'O')
     opposite = oppositeSide[side]
 
     if len(possible['X']) == 0 and len(possible['O']) == 0:
@@ -156,7 +134,7 @@ while canMove:
     negas = {}
     for pos in possible[side]:
         child = board[:pos] + side + board[pos+1:]
-        negas[pos] = negascout(child, 4, float("-inf"), float("inf"), side)
+        negas[pos] = negascout(child, 5, float("-inf"), float("inf"), side)
     maximum = float("-inf")
     for pos in negas:
         if negas[pos] > maximum:
@@ -165,13 +143,28 @@ while canMove:
     movePos = maxpos   
 
     board = board[:movePos] + side + board[movePos+1:]
+    
+    
     flip = set()
-    for path in paths:
-        if movePos in path:
-            parent = path[movePos]
-            while parent is not None:
-                flip.add(parent)
-                parent = path[parent]
+    for path in cellPaths[movePos]:
+        # if board[path[0]] != side:
+        #     path = path[::-1]
+        # for i in range(1, len(path)):
+        #     if
+        
+        
+        
+        index = 1
+        if board[path[0]] != side:
+            path = path[::-1]
+        if board[path[index]] == opposite and side in [board[path[i]] for i in range(1, len(path))]:
+            temp = set()
+            while board[path[index]] == opposite:
+                temp.add(path[index])
+                index += 1
+            if board[path[index]] == side:
+                flip |= temp
+     
     for pos in flip:
         board = board[:pos] + side + board[pos+1:]
 

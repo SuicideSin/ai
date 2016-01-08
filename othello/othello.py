@@ -161,8 +161,19 @@ def alphabeta(board, depth, alpha, beta, onside, side):
                 break
         return v
 
+pvc = False
+cvc = False
+pvp = True
+if len(sys.argv) > 1:
+    if sys.argv[1] == 'pvc':
+        pvc = True
+    elif sys.argv[1] == 'cvc':
+        cvc = True
+
 display(board)
-player = input("Please choose a side (X or O): ").upper()
+player = 'X'
+if pvc:
+    player = input("Please choose a side (X or O): ").upper()
 side = 'X'
 canMove = True
 while canMove:
@@ -180,7 +191,8 @@ while canMove:
         continue
 
     print("====== {}'s Turn ======".format(side))
-    if side == player:
+    print(possible[side])
+    if (side == player and pvc) or (not pvp):
         invalid = True
         movePos = 0
         while invalid:
@@ -199,7 +211,7 @@ while canMove:
             else:
                 print("Invalid move. Try again.")
     
-    else: #Computer's turn
+    elif pvc or cvc:
         negas = {}
         for pos in possible[side]:
             child = board[:pos] + side + board[pos+1:]
@@ -210,7 +222,7 @@ while canMove:
                 maximum = negas[pos]
                 maxpos = pos
         movePos = maxpos   
-        #print("{} Moves to {},{}".format(side, int(pos/8), pos%8))
+        print("{} Moves to {},{}".format(side, int(pos/8), pos%8))
 
     board = board[:movePos] + side + board[movePos+1:]
     flip = set()

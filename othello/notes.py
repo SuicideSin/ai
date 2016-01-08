@@ -56,6 +56,10 @@ For Tuesday of next year
 5. Build in smarts
 
 
+Transformation HW:
+    dictionary indexed by the transformation abbreviation (lowercase)
+    
+    values are a transformation array
 
 
 For the contest, you get half a second to a second to move. Excess time can be put forward into the next move.
@@ -67,8 +71,8 @@ Entering an illegal move will carry a half point or point deduction.
 
 Ideas for computer:
     - Zobrist hashing
-    - Transposition tables (400 MB, that's a lot!)
-    - Implement mtd-f search
+    - Transposition tables (400 MB, that's a lot of space!)
+    - Implement mtd-f search, maybe!
     - 
 
 '''
