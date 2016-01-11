@@ -58,7 +58,14 @@ For Tuesday of next year
 
 Transformation HW:
     dictionary indexed by the transformation abbreviation (lowercase)
-    
+    i: just return the normal board
+    rl: rotate left (counter-clockwise)
+    rr: rotate right (clockwise)
+    r2: rotate twice
+    fx: flip over x-axis
+    fy: flip over y-axis
+    fd: flip over the line y = x
+    fo: flip over the line y = -x
     values are a transformation array
 
 

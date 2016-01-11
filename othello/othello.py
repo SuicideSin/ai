@@ -39,6 +39,17 @@ for i in range(64):
     cellPaths[i] = paths
 oppositeSide = {"X": "O", "O":"X"}
 
+i = [i for i in range(64)]
+rl = [pos for arr in [[j for j in range(64) if j%8 == abs(i-8)] for i in range(1, 9)] for pos in arr]
+rr = [pos for arr in [[abs(j-64) for j in range(1,65) if abs(j-64)%8 == i] for i in range(8)] for pos in arr]
+r2 = [pos for arr in [[abs(j-64) for j in range(1,65) if int(abs(j-64)/8) == abs(i-8)] for i in range(1,9)] for pos in arr]
+fx = [pos for arr in [[j for j in range(64) if int(j/8) == abs(i-8)] for i in range(1, 9)] for pos in arr]
+fy = [pos for arr in [[abs(j-64) for j in range(1,65) if int(abs(j-64)/8) == i] for i in range(8)] for pos in arr]
+fd = [pos for arr in [[abs(j-64) for j in range(1,65) if abs(j-64)%8 == abs(i-8)] for i in range(1, 9)] for pos in arr]
+fo = [pos for arr in [[j for j in range(64) if int(j%8) == i] for i in range(8)] for pos in arr]
+
+trans = {"i":i, "rl":rl, "rr":rr, "r2":r2, "fx":fx, "fy":fy, "fd":fd, "fo":fo}
+
 def coord(position):
     return(int(pos/8), pos%8)
 
@@ -46,8 +57,11 @@ def display(*args):
     board = {i: args[0][i] for i in range(len(args[0]))}
 
     if len(args) == 3:
-        for i in args[1]:
-            board[i] = '\033[32m' + args[2] + '\033[0m'
+        for i in board:
+            if i in args[1]:
+                board[i] = '\033[32m' + board[i] + '\033[0m'
+            if i == args[2]:
+                board[i] = '\033[31m' + board[i] + '\033[0m'
 
     for i in board:
         if board[i] == "X":
@@ -123,7 +137,7 @@ def negascout(board, depth, alpha, beta, side):
         return board.count(side)
     first = True
     for pos in possible[side]:
-        child = board[:pos] + side + board[pos+1:]
+        child = flipBoard(board, pos, side, paths)
         if first == True:
             first = False
             score = -negascout(child, depth-1, -alpha-1, -alpha, opposite)
@@ -135,7 +149,21 @@ def negascout(board, depth, alpha, beta, side):
         if alpha >= beta:
             break
     return alpha
-    
+
+def flipBoard(board, move, side, paths):
+    board = board[:move] + side + board[move+1:]
+    flip = []
+    for path in paths:
+        if move in path:
+            parent = path[move]
+            while parent is not None and parent != side:
+                flip.append(parent)
+                parent = path[parent]
+    for pos in flip:
+        board = board[:pos] + side + board[pos+1:]
+        
+    return board
+  
 def alphabeta(board, depth, alpha, beta, onside, side):
     possible = {}
     possible['X'], possible['O'], paths = packPossible(board, side)
@@ -163,12 +191,14 @@ def alphabeta(board, depth, alpha, beta, onside, side):
 
 pvc = False
 cvc = False
-pvp = True
+pvp = False
 if len(sys.argv) > 1:
     if sys.argv[1] == 'pvc':
         pvc = True
     elif sys.argv[1] == 'cvc':
         cvc = True
+else:
+    pvp = True
 
 display(board)
 player = 'X'
@@ -176,6 +206,7 @@ if pvc:
     player = input("Please choose a side (X or O): ").upper()
 side = 'X'
 canMove = True
+ply = 1
 while canMove:
     possible = {}
     possible['X'], possible['O'], paths = packPossible(board, side)
@@ -190,32 +221,34 @@ while canMove:
         side = opposite
         continue
 
-    print("====== {}'s Turn ======".format(side))
-    print(possible[side])
-    if (side == player and pvc) or (not pvp):
+    print("====== Ply {}: {}'s Turn ======".format(ply, side))
+    '''print(possible[side])'''
+    if (side == player and pvc) or pvp:
         invalid = True
         movePos = 0
         while invalid:
-            response = input("Please enter a move in row, col format: ")
+            response = input("Player {}, Please enter a move in row, col format: ".format(side))
             move = [int(response[i]) for i in range(len(response)) if response[i] in "1234567890"]
+            position = -1
+            if response.lower() in trans:
+                tempboard = ""
+                for pos in trans[response.lower()]:
+                    tempboard += board[pos]
+                display(tempboard)
             if (' ' or ',' in response) and len(move) == 2 and len(response) > 2:
                 #print(len(response))
                 position = move[0] * 8 + move[1]
             elif len(response) == 2 and len(move) == 2:
                 position = int(response)
-            else:
-                print("Invalid move. Try again.")
             if position in possible[side]:
                 movePos = position
                 invalid = False
-            else:
-                print("Invalid move. Try again.")
     
     elif pvc or cvc:
         negas = {}
         for pos in possible[side]:
             child = board[:pos] + side + board[pos+1:]
-            negas[pos] = negascout(child, 5, float("-inf"), float("inf"), side)
+            negas[pos] = negascout(child, 4, float("-inf"), float("inf"), side)
         maximum = float("-inf")
         for pos in negas:
             if negas[pos] > maximum:
@@ -224,21 +257,12 @@ while canMove:
         movePos = maxpos   
         print("{} Moves to {},{}".format(side, int(pos/8), pos%8))
 
-    board = board[:movePos] + side + board[movePos+1:]
-    flip = set()
-    for path in paths:
-        if movePos in path:
-            parent = path[movePos]
-            while parent is not None:
-                flip.add(parent)
-                parent = path[parent]
-    for pos in flip:
-        board = board[:pos] + side + board[pos+1:]
-
-
-
-    display(board)
+    newBoard = flipBoard(board, movePos, side, paths)
+    flip = [i for i in range(64) if board[i] != newBoard[i] and i != movePos]
+    board = newBoard
+    display(board, flip, movePos)
     side = opposite
+    ply += 1
 
 
 xc = board.count("X")
