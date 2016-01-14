@@ -45,7 +45,7 @@ for i in range(64):
                 paths[5].append(k)
     paths = [path for path in paths if path]
     cellPaths[i] = paths
-    
+
 oppositeSide = {"X": "O", "O":"X"}
 
 i = [i for i in range(64)]
@@ -64,7 +64,7 @@ def coord(position):
 
 def display(*args):
     board = {i: args[0][i] for i in range(len(args[0]))}
-    
+
     if len(args) == 2:
         for i in board:
             if i in args[1]:
@@ -211,13 +211,14 @@ def flipBoard(board, move, side):
             flip += temp
     for pos in flip:
         board = board[:pos] + side + board[pos+1:]
-        
+
     return board
 
 pvc = False
 cvc = False
 pvp = False
 mult = False
+smart = None
 if len(sys.argv) > 1:
     if sys.argv[1] == 'pvc':
         pvc = True
@@ -225,6 +226,7 @@ if len(sys.argv) > 1:
         cvc = True
         if len(sys.argv) > 2:
             mult = True
+            smart = sys.argv[3]
 else:
     pvp = True
 
@@ -279,18 +281,20 @@ def othello():
                     invalid = False
                 else:
                     print("Invalid move.")
-    
+
         elif pvc:
             movePos = nextMove(board, side, possible)
-    
+
         elif cvc:
             tick = time.clock()
-            if side == 'X':
+            if smart:
+                if side == smart:
+                    movePos = nextMove(board, side, possible)
+                else:
+                    movePos = randMove(board, side, possible)
+            else:
                 movePos = nextMove(board, side, possible)
-               
-            elif side == 'O':
-                movePos = randMove(board, side, possible)
-            
+
             tock = time.clock()
 
         newBoard = flipBoard(board, movePos, side)
@@ -314,7 +318,7 @@ def othello():
             print("No winner. Both players scored {}.".format(scores[winner]))
         else:
             print("{} wins {} to {}.".format(winner, scores[winner], scores[loser]))
-        
+
     return scores
 
 if mult:
@@ -332,13 +336,13 @@ if mult:
             wins[winner] += 1
             points[winner] += scores[winner]
             points[loser] += scores[loser]
-        
+
     xavg = points['X']/trials
     oavg = points['O']/trials
-    
+
     print("X won {} times with an average of {} tiles.".format(wins['X'], xavg))
     print("O won {} times with an average of {} tiles.".format(wins['O'], oavg))
     print("{} ties.".format(ties))
-        
+
 else:
     othello()
