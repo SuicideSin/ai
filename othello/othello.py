@@ -177,7 +177,7 @@ def nextMove(board, side, possible):
         negas = {}
         for pos in possible[side]:
             child = board[:pos] + side + board[pos+1:]
-            negas[pos] = negascout(child, 1, float("-inf"), float("inf"), side)
+            negas[pos] = negascout(child, 2, float("-inf"), float("inf"), side)
         movePos = max(negas.keys(), key=(lambda key: negas[key]))
     return movePos
 
@@ -220,13 +220,13 @@ pvp = False
 mult = False
 smart = None
 if len(sys.argv) > 1:
-    if sys.argv[1] == 'pvc':
+    if sys.argv[1].lower() == 'pvc':
         pvc = True
-    elif sys.argv[1] == 'cvc':
+    elif sys.argv[1].lower() == 'cvc':
         cvc = True
         if len(sys.argv) > 2:
             mult = True
-            smart = sys.argv[3]
+            smart = sys.argv[3].upper()
 else:
     pvp = True
 
