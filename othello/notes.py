@@ -82,6 +82,9 @@ Ideas for computer:
     - Implement mtd-f search, maybe!
     - 
 
+List of improvements:
+    - 
+
 '''
 
 
