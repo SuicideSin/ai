@@ -1,4 +1,6 @@
 import sys
+from random import randint
+
 cellPaths = {}
 for i in range(64):
     paths = [[] for j in range(8)]
@@ -61,7 +63,7 @@ def findPossible(board, side):
 
     opposite = oppositeSide[side]
     allPos = [pos for pos in range(64) if board[pos] == side]
-    possible = {}
+    possible = set()
 
     for pos in allPos:
         for path in cellPaths[pos]:
@@ -74,7 +76,7 @@ def findPossible(board, side):
                     break
                 elif board[pathPos] == '.':
                     if valid:
-                        possible[pathPos] = path
+                        possible.add(pathPos)
                     break
     return possible
 
@@ -128,8 +130,8 @@ def alphabeta(board, depth, alpha, beta, onside, side):
 def nextMove(board, side, possible):
     cornerPos = [0, 7, 56, 63]
     sidePos = [i for i in range(7)] + [i for i in range(0,63,8)] + [i for i in range(7,63,8)] + [i for i in range(56,64)]
-    corners = [i for i in cornerPos if i in possible[side]]
-    sides = [i for i in sidePos if i in possible[side] and i not in [1, 8, 6, 15, 48, 57, 62, 55]]
+    corners = [i for i in cornerPos if i in possible]
+    sides = [i for i in sidePos if i in possible and i not in [1, 8, 6, 15, 48, 57, 62, 55]]
     if corners:
         movePos = corners[randint(0, len(corners)-1)]
     elif sides:
@@ -137,20 +139,10 @@ def nextMove(board, side, possible):
     else:
         movePos = None
         negas = {}
-        for pos in possible[side]:
+        for pos in possible:
             child = board[:pos] + side + board[pos+1:]
             negas[pos] = negascout(child, 2, float("-inf"), float("inf"), side)
         movePos = max(negas.keys(), key=(lambda key: negas[key]))
-    return movePos
-
-def randMove(board, side, possible):
-    rand = randint(0, len(possible[side]))
-    i = 0
-    for pos in possible[side]:
-        movePos = pos
-        if i == rand:
-            break
-        i += 1
     return movePos
 
 def flipBoard(board, move, side):
@@ -179,4 +171,4 @@ def flipBoard(board, move, side):
 board = sys.argv[1]
 side = sys.argv[2]
 
-print(randMove(board,side,findPossible(board, side)))
+print(nextMove(board,side,findPossible(board, side)))
