@@ -24,22 +24,17 @@ import re
 #
 TIMEOUT = 1.5 # seconds allowed per move
 #
-startTime = time()
 theE = '.'
 theX = 'X'
 theO = 'O'
 #
-print ("{} running under\nversion {}".format(path.basename(__file__), sys.version))
 
-fname = path.abspath('BaselineRandom.py') if path.isfile('BaselineRandom.py') else path.abspath('BaselineRandom.pyc')
-# fname = path.abspath('BaselineRandom.py')
-gname = path.abspath('corners.py')
-
+fname = path.abspath('randomBaseline.py')
+gname = path.abspath('negascout.py')
 runCount = 1
 if len(sys.argv)>1: runCount = int(2 * float(sys.argv[1]))
 if len(sys.argv)>2: gname = path.abspath(sys.argv[2])
 if len(sys.argv)>3: fname = path.abspath(sys.argv[3])
-preBoard = sys.argv[4].upper() if len(sys.argv)>4 else ""
 #
 ##################################################
 #
@@ -152,9 +147,8 @@ def getPossMoves( theboard , thepiece ) :
 #
 ##################################################
 #
-def getMove( strategyScript , theboard , thepiece , timeForThisMove , debugLevel=0) :
+def getMove( fname , theboard , thepiece , timeForThisMove , debugLevel=0) :
    #
-   global aBad
    possMoves = getPossMoves( theboard , thepiece )
    #
    if len( possMoves ) == 0 : return -1 # does happen
@@ -165,8 +159,8 @@ def getMove( strategyScript , theboard , thepiece , timeForThisMove , debugLevel
    timeLeft = "{}".format(timeForThisMove)   # ensure a string
    #
    # If the python executable is named python3.exe then use the first line; If it is python.exe then keep as is
-   myargs = [ 'python3' , strategyScript , strboard , thepiece , timeLeft ]
-   myargs = [ 'python' , strategyScript , strboard , thepiece, timeLeft ]
+   myargs = [ 'python3' , fname , strboard , thepiece , timeLeft ]
+   myargs = [ 'python' , fname , strboard , thepiece, timeLeft ]
    #
    po = Popen( myargs , stdout = PIPE , stderr = PIPE )
    #
@@ -188,8 +182,6 @@ def getMove( strategyScript , theboard , thepiece , timeForThisMove , debugLevel
       x , y = po . communicate()
       #
 
-      global timeoutCount
-      timeoutCount += 1
       if debugLevel > 0:
         print( '*** timeout' )
       #
@@ -222,8 +214,6 @@ def getMove( strategyScript , theboard , thepiece , timeForThisMove , debugLevel
       #
       # then check for a one-indexed (OBOB) match
       #
-
-      aBad = [aBad[0]+ (strategyScript==fname), aBad[1]+ (strategyScript==gname)]
 
       if debugLevel > 1:
         print( '*** obob' )
@@ -258,8 +248,6 @@ def getMove( strategyScript , theboard , thepiece , timeForThisMove , debugLevel
    #
    #------------------------ END ---------------------#
    #
-
-   aBad = [aBad[0]+ (strategyScript==fname), aBad[1]+ (strategyScript==gname)]
    if debugLevel > 1:
      print( '*** default random' )
    #
@@ -349,7 +337,6 @@ def playGame(aCompetitors, timePerMove, debugLevel=0):
   theboard[36] = theX
   theboard[28] = theO
   theboard[35] = theO
-  if preBoard: theboard = [preBoard[pos] for pos in range(len(preBoard))]
   aTimeLeft = [0.0, 0.0]
 
   if debugLevel>2:
@@ -360,7 +347,6 @@ def playGame(aCompetitors, timePerMove, debugLevel=0):
 
   passCt = 0
 
-  aMoves = []
   while passCt < 2:
     fname = aCompetitors[0]
     if debugLevel > 2:
@@ -370,7 +356,6 @@ def playGame(aCompetitors, timePerMove, debugLevel=0):
     num = getMove( fname , theboard , thepiece, aTimeLeft[0] + timePerMove, debugLevel )
     toc = time()
    #
-    aMoves.append(num)
     if num != -1 :
       if debugLevel > 2:
         print ("{} as {} moves to index {} (row,col: {},{}) in {} seconds".format(
@@ -397,37 +382,25 @@ def playGame(aCompetitors, timePerMove, debugLevel=0):
     aTimeLeft = aTimeLeft[::-1]
   if debugLevel > 0:
     print ("Time left: {}".format(aTimeLeft))
-  return (theboard.count(theX), theboard.count(theO), aMoves)
+  return (theboard.count(theX), theboard.count(theO))
 
 
-timeoutCount = 0
+
 aComp = [fname, gname]               # The competitors
-aBad   = [0, 0]                      # Total number of bad guesses made by this strategy
 aScore = [0, 0]                      # Number of wins each one has
-aTotal = [0, 0]                      # Total number of tokens this strategy got
 for gameNum in range(runCount):      # Play a series of games, alternating who goes first
   # Next line plays the game
-  xScore, oScore, aMoves = playGame(aComp[::1-2*(gameNum % 2)], TIMEOUT, 1+2*(runCount<2))
+  xScore, oScore = playGame(aComp[::1-2*(gameNum % 2)], TIMEOUT, 1+2*(runCount<2))
   # Next line summarizes the game
-  print ("Game {} score is {}: {} to {}: {}".format(gameNum, re.sub("^.*[/\\\\]", '' , aComp[gameNum % 2]), xScore,
+  print ("Game {} score is {}: {} to {}: {}\n".format(gameNum, re.sub("^.*[/\\\\]", '' , aComp[gameNum % 2]), xScore,
                                                                re.sub("^.*[/\\\\]", '' , aComp[1-(gameNum % 2)]), oScore))
-  if (xScore==oScore) or (xScore>oScore)==((gameNum % 2) == 0):
-    aMoves = [str(aMoves[i]) for i in range(len(aMoves))]
-    print (" ".join(aMoves[:-2]))
   # Update the scores
-  aTotal = [aTotal[0]+oScore, aTotal[1]+xScore] if gameNum % 2 else [aTotal[0]+xScore, aTotal[1]+oScore]
   aScore = [aScore[0]+(oScore>xScore), aScore[1]+(xScore>oScore)] if gameNum % 2 \
       else [aScore[0]+(xScore>oScore), aScore[1]+(oScore>xScore)]
-  print (" ")
 
 # Print overall results
-print ("After playing {} games, the score is\n{}: {} games ({} total tokens) vs {}: {} games ({} total tokens)".format(
-           runCount, re.sub("^.*[/\\\\]", '' , fname), aScore[0], aTotal[0],
-                     re.sub("^.*[/\\\\]", '' , gname), aScore[1], aTotal[1]))
-badMoves = "\n{} bad moves by {}".format(aBad[0], fname) if aBad[0]>0 else ""
-badMoves += ("\n" if badMoves!="" else "\n") + "{} bad moves by {}".format(aBad[1], gname) if aBad[1]>0 else ""
-print ("Total time: {}s;  Timeout count: {}{}".format(time() - startTime, timeoutCount, badMoves))
-
+print ("After playing {} games, the score is\n{}: {} and {}: {}".format(runCount, re.sub("^.*[/\\\\]", '' , fname), aScore[0],
+                                                                                  re.sub("^.*[/\\\\]", '' , gname), aScore[1]))
 
 ##################################################
 #

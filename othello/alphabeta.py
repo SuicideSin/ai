@@ -138,11 +138,12 @@ def nextMove(board, side, possible):
         movePos = sides[randint(0, len(sides)-1)]
     else:
         movePos = None
-        negas = {}
+        ab = {}
         for pos in possible:
-            child = board[:pos] + side + board[pos+1:]
-            negas[pos] = negascout(child, 3, float("-inf"), float("inf"), side)
-        movePos = max(negas.keys(), key=(lambda key: negas[key]))
+            #child = board[:pos] + side + board[pos+1:]
+            child = flipBoard(board, pos, side)
+            ab[pos] = alphabeta(child, 4, float("-inf"), float("inf"), True, side)
+        movePos = max(ab.keys(), key=(lambda key: ab[key]))
     return movePos
 
 def flipBoard(board, move, side):

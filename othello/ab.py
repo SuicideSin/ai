@@ -80,17 +80,88 @@ def findPossible(board, side):
                     break
     return possible
 
-def randMove(board, side, possible):
-    rand = randint(0, len(possible)-1)
-    i = 0
-    for pos in possible:
-        movePos = pos
-        if i == rand:
+def negascout(board, depth, alpha, beta, side):
+    possible = {}
+    possible['X'], possible['O'] = findPossible(board, 'X'), findPossible(board, 'O')
+    opposite = oppositeSide[side]
+
+    if depth == 0 or (len(possible['X']) == 0 and len(possible['O']) == 0):
+        return board.count(side)
+    first = True
+    for pos in possible[side]:
+        child = flipBoard(board, pos, side)
+        if first == True:
+            first = False
+            score = -negascout(child, depth-1, -alpha-1, -alpha, opposite)
+            if alpha < score < beta:
+                score = -negascout(child, depth-1, -beta, -alpha, opposite)
+        else:
+            score = -negascout(child, depth-1, -beta, -alpha, opposite)
+        alpha = max(alpha, score)
+        if alpha >= beta:
             break
-        i += 1
+    return alpha
+
+def alphabeta(board, depth, alpha, beta, onside, side):
+    possible = {}
+    possible['X'], possible['O'] = findPossible(board, 'X'), findPossible(board, 'O')
+    opposite = oppositeSide[side]
+    if depth == 0 or (len(possible['X']) == 0 and len(possible['O']) == 0):
+        return board.count(side)
+    if onside:
+        v = float("-inf")
+        for pos in possible[side]:
+            child = flipBoard(board, pos, side)
+            v = max(v, alphabeta(child, depth -1, alpha, beta, False, side))
+            alpha = max(alpha, v)
+            if beta <= alpha:
+                break
+        return v
+    else:
+        v = float("inf")
+        for pos in possible[opposite]:
+            child = board[:pos] + opposite + board[pos+1:]
+            v = min(v, alphabeta(child, depth-1, alpha, beta, True, side))
+            beta = min(v, beta)
+            if beta <= alpha:
+                break
+        return v
+
+def nextMove(board, side, possible):
+
+    movePos = None
+    ab = {}
+    for pos in possible:
+        #child = board[:pos] + side + board[pos+1:]
+        child = flipBoard(board, pos, side)
+        ab[pos] = alphabeta(child, 4, float("-inf"), float("inf"), True, side)
+    movePos = max(ab.keys(), key=(lambda key: ab[key]))
     return movePos
+
+def flipBoard(board, move, side):
+    opposite = oppositeSide[side]
+    board = board[:move] + side + board[move+1:]
+    flip = []
+    paths = [path for path in cellPaths[move] if board[path[0]] == opposite]
+    for path in cellPaths[move]:
+        temp = []
+        valid = False
+        for pos in path:
+            if board[pos] == '.':
+                break
+            elif board[pos] == side:
+                valid = True
+                break
+            else:
+                temp.append(pos)
+        if valid:
+            flip += temp
+    for pos in flip:
+        board = board[:pos] + side + board[pos+1:]
+
+    return board
 
 board = sys.argv[1]
 side = sys.argv[2]
 
-print(randMove(board,side,findPossible(board, side)))
+print(nextMove(board,side,findPossible(board, side)))
