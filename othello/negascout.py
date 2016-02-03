@@ -86,7 +86,7 @@ def negascout(board, depth, alpha, beta, side):
     opposite = oppositeSide[side]
 
     if depth == 0 or (len(possible['X']) == 0 and len(possible['O']) == 0):
-        return board.count(side)
+        return 0.001 * board.count(side) + len(possible[side]) + 10 * len([i for i in range(64) if board[i] == side and i in [0, 7, 56, 63]])
     first = True
     for pos in possible[side]:
         child = flipBoard(board, pos, side)
@@ -107,7 +107,7 @@ def alphabeta(board, depth, alpha, beta, onside, side):
     possible['X'], possible['O'] = findPossible(board, 'X'), findPossible(board, 'O')
     opposite = oppositeSide[side]
     if depth == 0 or (len(possible['X']) == 0 and len(possible['O']) == 0):
-        return board.count(side)
+        return 0.001 * board.count(side) + len(possible[side]) + 10 * len([i for i in range(64) if board[i] == side and i in [0, 7, 56, 63]])
     if onside:
         v = float("-inf")
         for pos in possible[side]:
@@ -121,28 +121,29 @@ def alphabeta(board, depth, alpha, beta, onside, side):
         v = float("inf")
         for pos in possible[opposite]:
             child = board[:pos] + opposite + board[pos+1:]
-            v = min(v, alphabeta(child, depth-1, alpha, beta, True, side))
+            v = min(v, alphabeta(child, depth-1, alpha, beta, side))
             beta = min(v, beta)
             if beta <= alpha:
                 break
         return v
 
 def nextMove(board, side, possible):
-    cornerPos = [0, 7, 56, 63]
-    sidePos = [i for i in range(7)] + [i for i in range(0,63,8)] + [i for i in range(7,63,8)] + [i for i in range(56,64)]
-    corners = [i for i in cornerPos if i in possible]
-    sides = [i for i in sidePos if i in possible and i not in [1, 8, 6, 15, 48, 57, 62, 55]]
-    if corners:
-        movePos = corners[randint(0, len(corners)-1)]
-    elif sides:
-        movePos = sides[randint(0, len(sides)-1)]
-    else:
-        movePos = None
-        negas = {}
-        for pos in possible:
-            child = board[:pos] + side + board[pos+1:]
-            negas[pos] = negascout(child, 3, float("-inf"), float("inf"), side)
-        movePos = max(negas.keys(), key=(lambda key: negas[key]))
+    # cornerPos = [0, 7, 56, 63]
+#     sidePos = [i for i in range(7)] + [i for i in range(0,63,8)] + [i for i in range(7,63,8)] + [i for i in range(56,64)]
+#     corners = [i for i in cornerPos if i in possible]
+#     sides = [i for i in sidePos if i in possible and i not in [1, 8, 6, 15, 48, 57, 62, 55]]
+#     if corners:
+#         movePos = corners[randint(0, len(corners)-1)]
+#     elif sides:
+#         movePos = sides[randint(0, len(sides)-1)]
+#     else:
+    movePos = None
+    negas = {}
+    for pos in possible:
+        #child = board[:pos] + side + board[pos+1:]
+        child = flipBoard(board, pos, side)
+        negas[pos] = negascout(child, 5, float("-inf"), float("inf"), True, side)
+    movePos = max(negas.keys(), key=(lambda key: negas[key]))
     return movePos
 
 def flipBoard(board, move, side):
