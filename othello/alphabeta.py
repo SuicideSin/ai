@@ -39,7 +39,7 @@ def alphabeta(board, depth, alpha, beta, onside, side):
         score += 10 * len([i for i in range(64) if board[i] == side and i in corners])
         score -= 10 * len([i for i in range(64) if board[i] == opposite and i in corners])
         xwing = dict(zip([9, 14, 49, 54], corners))
-        score -= 5 * len([i for i in xwing if board[i] != board[xwing[i]]])
+        score -= 2 * len([i for i in xwing if board[i] != board[xwing[i]]])
         return score
     if onside:
         v = float("-inf")
