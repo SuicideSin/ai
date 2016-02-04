@@ -2,6 +2,9 @@ import sys, time
 from tqdm import tqdm
 from random import randint
 
+corners = [0, 7, 56, 63]
+xsquares = dict(zip([9, 14, 49, 54], corners))
+csquares = {8: 0, 1: 0, 6: 7, 15: 7, 55: 63, 62: 63, 48: 56, 57: 56}
 cellPaths = {}
 for i in range(64):
     paths = [[] for j in range(8)]
@@ -143,7 +146,13 @@ def alphabeta(board, depth, alpha, beta, onside, side):
     possible['X'], possible['O'] = findPossible(board, 'X'), findPossible(board, 'O')
     opposite = oppositeSide[side]
     if depth == 0 or (len(possible['X']) == 0 and len(possible['O']) == 0):
-        return board.count(side)
+        score = 0
+        score += 0.001 * board.count(side) + len(possible[side])
+        score += 10 * len([i for i in range(64) if board[i] == side and i in corners])
+        score -= 10 * len([i for i in range(64) if board[i] == opposite and i in corners])
+        score -= 10 * len([i for i in xsquares if board[i] != board[xsquares[i]]])
+        score -= 3 * len([i for i in csquares if board[i] != board[csquares[i]]])
+        return score
     if onside:
         v = float("-inf")
         for pos in possible[side]:
@@ -163,22 +172,15 @@ def alphabeta(board, depth, alpha, beta, onside, side):
                 break
         return v
 
-def nextMove(board, side, possible, depth):
-    cornerPos = [0, 7, 56, 63]
-    sidePos = [i for i in range(7)] + [i for i in range(0,63,8)] + [i for i in range(7,63,8)] + [i for i in range(56,64)]
-    corners = [i for i in cornerPos if i in possible[side]]
-    sides = [i for i in sidePos if i in possible[side] and i not in [1, 8, 6, 15, 48, 57, 62, 55]]
-    if corners:
-        movePos = corners[randint(0, len(corners)-1)]
-    elif sides:
-        movePos = sides[randint(0, len(sides)-1)]
-    else:
-        movePos = None
-        negas = {}
-        for pos in possible[side]:
-            child = board[:pos] + side + board[pos+1:]
-            negas[pos] = negascout(child, depth, float("-inf"), float("inf"), side)
-        movePos = max(negas.keys(), key=(lambda key: negas[key]))
+def nextMove(board, side, possible):
+    movePos = None
+    ab = {}
+    possible = findPossible(board, side)
+    for pos in possible:
+        #child = board[:pos] + side + board[pos+1:]
+        child = flipBoard(board, pos, side)
+        ab[pos] = alphabeta(child, 3, float("-inf"), float("inf"), True, side)
+    movePos = max(ab.keys(), key=(lambda key: ab[key]))
     return movePos
 
 def randMove(board, side, possible):
@@ -284,17 +286,17 @@ def othello():
                     print("Invalid move.")
 
         elif pvc:
-            movePos = nextMove(board, side, possible, 4)
+            movePos = nextMove(board, side, possible)
 
         elif cvc:
             tick = time.clock()
             if smart:
                 if side == smart:
-                    movePos = nextMove(board, side, possible, 4)
+                    movePos = nextMove(board, side, possible)
                 else:
                     movePos = randMove(board, side, possible)
             else:
-                movePos = nextMove(board, side, possible, 4)
+                movePos = nextMove(board, side, possible)
 
             tock = time.clock()
             print("Move found in %f seconds." % (tock - tick))
