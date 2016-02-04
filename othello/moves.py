@@ -6,6 +6,8 @@ cellPaths = {0: [[1, 2, 3, 4, 5, 6, 7], [8, 16, 24, 32, 40, 48, 56], [9, 18, 27,
 oppositeSide = {"X": "O", "O":"X"}
 
 corners = [0, 7, 56, 63]
+xsquares = dict(zip([9, 14, 49, 54], corners))
+csquares = {8: 0, 1: 0, 6: 7, 15: 7, 55: 63, 62: 63, 48: 56, 57: 56}
 
 def findPossible(board, side):
     global cellPaths, oppositeSide
@@ -38,8 +40,8 @@ def alphabeta(board, depth, alpha, beta, onside, side):
         score += 0.001 * board.count(side) + len(possible[side])
         score += 10 * len([i for i in range(64) if board[i] == side and i in corners])
         score -= 10 * len([i for i in range(64) if board[i] == opposite and i in corners])
-        xwing = dict(zip([9, 14, 49, 54], corners))
-        score -= 5 * len([i for i in xwing if board[i] != board[xwing[i]]])
+        score -= 10 * len([i for i in xsquares if board[i] != board[xsquares[i]]])
+        #score -= 3 * len([i for i in csquares if board[i] != board[csquares[i]]])
         return score
     if onside:
         v = float("-inf")
