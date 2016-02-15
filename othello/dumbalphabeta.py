@@ -34,13 +34,7 @@ def alphabeta(board, depth, alpha, beta, onside, side):
     possible['X'], possible['O'] = findPossible(board, 'X'), findPossible(board, 'O')
     opposite = oppositeSide[side]
     if depth == 0 or (len(possible['X']) == 0 and len(possible['O']) == 0):
-        score = 0
-        score += 0.001 * board.count(side) + len(possible[side])
-        score += 10 * len([i for i in range(64) if board[i] == side and i in corners])
-        score -= 10 * len([i for i in range(64) if board[i] == opposite and i in corners])
-        xwing = dict(zip([9, 14, 49, 54], corners))
-        score -= 2 * len([i for i in xwing if board[i] != board[xwing[i]]])
-        return score
+        return board.count(side)
     if onside:
         v = float("-inf")
         for pos in possible[side]:
@@ -61,6 +55,15 @@ def alphabeta(board, depth, alpha, beta, onside, side):
         return v
 
 def nextMove(board, side, possible):
+    # cornerPos = [0, 7, 56, 63]
+    # corners = [i for i in cornerPos if i in possible]
+    # sidePos = [i for i in range(7)] + [i for i in range(0,63,8)] + [i for i in range(7,63,8)] + [i for i in range(56,64)]
+    # sides = [i for i in sidePos if i in possible and i not in [1, 8, 6, 15, 48, 57, 62, 55]]
+    # if corners:
+    #     return corners[randint(0, len(corners)-1)]
+    # elif sides:
+    #     movePos = sides[randint(0, len(sides)-1)]
+    # else:
     movePos = None
     ab = {}
     for pos in possible:
