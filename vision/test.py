@@ -72,7 +72,7 @@ cv2.imshow('Original', img)
 grayed = toGray(img)
 blurred = blur(grayed)
 
-pics = {"g":grayed, "b": blurred, "e":edges(blurred)}
+display = img.copy()
 
 while True:
     key = cv2.waitKey(0)
@@ -82,15 +82,17 @@ while True:
     if key == ord('r'):
         cv2.destroyAllWindows()
         cv2.imshow('Original', img)
-        pics["b"] = blurred
+        display = img
     if key == ord('g'):
         cv2.destroyAllWindows()
-        cv2.imshow('Grayscale', pics["g"])
+        display = toGray(display)
+        cv2.imshow('Grayscale', display)
     if key == ord('b'):
         cv2.destroyAllWindows()
-        cv2.imshow('Gaussian Blur', pics["b"])
-        pics["b"] = blur(pics["b"])
+        display = blur(display)
+        cv2.imshow('Gaussian Blur', display)
     if key == ord('e'):
         cv2.destroyAllWindows()
-        cv2.imshow('Edges', pics["e"])
+        display = edges(display)
+        cv2.imshow('Edges', display)
  

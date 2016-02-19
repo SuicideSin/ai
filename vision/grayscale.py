@@ -30,6 +30,8 @@ print("Time: {}".format(time.clock()-tick))
 
 
 cv2.imshow(fname[0:fname.find('.')], img)
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+while True:
+    key = cv2.waitKey(0)
+    if key == 27:
+        cv2.destroyAllWindows()
+        break

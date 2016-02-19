@@ -1,9 +1,25 @@
 '''
-Things to install:
-numpy
-opencv
+Assignments:
+
+
+Edge detection:
+    Color differential
+    Pixel values differnt
+    
+    a.k.a. Intensity difference peaks
+    
+    gradient, Gx = (-1 0 1)
+                   (-2 0 2)
+                   (-1 0 1)
+                   
+              Gy = ( 1  2  1)
+                   ( 0  0  0)
+                   (-1 -2 -1)
+                     
+            this is the derivative in the x or y direction
+    
+            Gx^2 + Gy^2 > or < T
+            
+            
 
 '''
-
-
-ln -s /usr/local/opt/opencv3/lib/python3.5/site-packages/cv2.cpython-35m-darwin.so ~/.pyenv/versions/3.5.0/lib/python3.5/site-packages/cv2.so

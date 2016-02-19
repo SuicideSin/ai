@@ -43,8 +43,21 @@ blurred = cv2.filter2D(img, -1, gauss)
 #edges = cv2.Canny(blurred,100,200)
 
 cv2.imshow('Guassian Blur', blurred)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+while True:
+    key = cv2.waitKey(0)
+    if key == 27:
+        cv2.destroyAllWindows()
+        break
+    if key == ord('r'):
+        cv2.destroyAllWindows()
+        cv2.imshow('Original', original)
+    if key == ord('g'):
+        cv2.destroyAllWindows()
+        cv2.imshow('Grayscale', img)
+    if key == ord('b'):
+        cv2.destroyAllWindows()
+        cv2.imshow('Gaussian Blur', blurred)
+        
  
 
 
