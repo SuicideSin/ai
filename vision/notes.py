@@ -18,8 +18,23 @@ Edge detection:
                      
             this is the derivative in the x or y direction
     
-            Gx^2 + Gy^2 > or < T
+            Gx^2 + Gy^2 > T
             
             
+Improving Sobel:
+    thin the edges,
+    refine the edges
+        remove noise, connect certain edges
+
+
+    Canny Edge detection:
+        Consider potential edge pixel p to nearest neighbors along the perpendicular to the supposed edge
+        Only keep p as an edge if its G value is the maximum
+        
+    ø = atan2(Gy, Gx)
+
+    Get rid of isolated artifacts:
+        
 
 '''
+
