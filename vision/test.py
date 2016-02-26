@@ -2,7 +2,7 @@
 import numpy as np
 import random
 from matplotlib import pyplot as plt
-import urllib.request, cv2, sys, re, time
+import urllib.request, cv2, sys, re, time, tqdm
 
 # Default image file
 imgSpec = "polarbear.jpg"
@@ -32,24 +32,17 @@ grayscale = np.array([0.3, 0.59, 0.11])
 gauss = np.array([[1, 2, 1],
                   [2, 4, 2],
                   [1, 2, 1]])/16
-                  
-gradientx = {0: [-1, 0, 1],
-             1: [-2, 0, 2],
-             2: [-1, 0, 1]}
-
-gradienty = {0: [1, 2, 1],
-             1: [0, 0, 0],
-             2: [-1, -2, -1]}
                       
-# def findNeighbors(i, j):
-#     rowLimit = height-1
-#     columnLimit = width-1
-#     n = []
-#     for x in range(max(0, i-1), min(i+1, rowLimit)+1):
-#         for y in range(max(0, j-1), min(j+1, columnLimit)+1):
-#             if x != i or y != j:
-#                 n.append((x,y))
-#     return n
+def findNeighbors(t):
+    i,j=t
+    rowLimit = height-1
+    columnLimit = width-1
+    n = []
+    for x in range(max(0, i-1), min(i+1, rowLimit)+1):
+        for y in range(max(0, j-1), min(j+1, columnLimit)+1):
+            if x != i or y != j:
+                n.append((x,y))
+    return n
     
 def roundAngle(value):
     array = np.array([45, 90, -45, -90, 0])
@@ -68,28 +61,12 @@ def blur(img):
     #blurred = filter(img, gauss)
     return blurred
 
-def filter(img, dic):
-    total = sum([sum(i) for i in dic.values()]) if sum([sum(i) for i in dic.values()]) > 0 else 1
-    new = img.copy()
-    for i in range(1,height-1):
-        for j in range(1,width-1):
-            new[i,j] = (dic[0][0]*int(img[i-1,j+1][0]) +
-                        dic[0][1]*int(img[i,j+1][0]) +
-                        dic[0][2]*int(img[i+1,j+1][0]) +
-                        dic[1][0]*int(img[i-1,j][0]) +
-                        dic[1][1]*int(img[i,j][0]) +
-                        dic[1][2]*int(img[i+1,j][0]) +
-                        dic[2][0]*int(img[i-1,j-1][0]) +
-                        dic[2][1]*int(img[i,j-1][0]) +
-                        dic[2][2]*int(img[i+1,j-1][0])) / total
-    return new
-    
-
 def edges(img):
     
     T = int(sys.argv[2]) if len(sys.argv) > 2 else 9000
 
-    edges = img.copy()
+    edges = np.zeros((height,width,3), np.uint8)
+    edges[:,:] = 255
     
     for i in range(1,height-1):
         for j in range(1,width-1):
@@ -98,17 +75,12 @@ def edges(img):
             
             if Gx**2 + Gy**2 > T:
                 edges[i,j] = 0
-            else:
-                edges[i,j] = 255
 
     return edges
     
 def canny1(img):
-    # Gx = cv2.filter2D(img, -1, gradientx)
-    #
-    # Gy = cv2.filter2D(img, -1, gradienty)
 
-    T = int(sys.argv[2]) if len(sys.argv) > 2 else 1200
+    T = int(sys.argv[2]) if len(sys.argv) > 2 else 9000
     
     edges = []
     pixels = {}
@@ -120,30 +92,28 @@ def canny1(img):
         for j in range(1,width-1):
             Gx = -int(img[i-1,j+1][0]) + int(img[i+1,j+1][0]) + -2*int(img[i-1,j][0]) + 2*int(img[i+1,j][0]) + -int(img[i-1,j-1][0]) + int(img[i+1,j-1][0])
             Gy = int(img[i-1,j+1][0]) + 2*int(img[i,j+1][0]) + int(img[i+1,j+1][0]) + -int(img[i-1,j-1][0]) + -2*int(img[i,j-1][0]) + -int(img[i+1,j-1][0])
-            
-            pixels[(i,j)] = (Gx, Gy)
             g = Gx**2 + Gy**2
+            pixels[(i,j)] = (Gx, Gy)
             if g > T:
                 edges.append((i,j))
     
     for i in edges:
-        #neighbors = findNeighbors(i[0],i[1]])
         angle = roundAngle(np.arctan2(pixels[i][1], pixels[i][0]) * 180 / np.pi) 
         
         x = i[0]
         y = i[1]
         
-        if 1 < x < height-1 and 1 < y < width-1: 
+        if 1 < x < height-2 and 1 < y < width-2: 
         
             if angle == 0:
                 x1,y1 = x+1,y
                 x2,y2 = x-1,y
                 
-            if angle == -45:
+            if angle == 45:
                 x1,y1 = x+1,y+1
                 x2,y2 = x-1,y-1
             
-            if angle == 45:
+            if angle == -45:
                 x1,y1 = x+1,y-1
                 x2,y2 = x-1,y+1
                 
@@ -160,37 +130,61 @@ def canny1(img):
 
     return cEdges
 
+def bfs(edges, start):
+    visited, queue = set(), [start]
+    while queue:
+        vertex = queue.pop(0)
+        if vertex not in visited:
+            visited.add(vertex)
+            queue.extend([n for n in findNeighbors(vertex) if n in edges and n not in visited])
+    return visited
+
+def dfs(edges, start):
+    visited, stack = set(), [start]
+    while stack:
+        vertex = stack.pop()
+        if vertex not in visited:
+            visited.add(vertex)
+            stack.extend([n for n in findNeighbors(vertex) if n in edges and n not in visited])
+    return visited
+ 
 def canny2(img):
-    Gx = cv2.filter2D(img, -1, gradientx)
-
-    Gy = cv2.filter2D(img, -1, gradienty)
-
-    T = int(sys.argv[2]) if len(sys.argv) > 2 else 1200
+    tick = time.clock()
+    T = int(sys.argv[2]) if len(sys.argv) > 2 else 9000
+    t = int(sys.argv[3]) if len(sys.argv) > 3 else 6000
     
-    lower = int(sys.argv[3]) if len(sys.argv) > 3 else 1000
-    upper = int(sys.argv[4]) if len(sys.argv) > 4 else 2000
-    
-    edges = []
+    edges = set()
+    weak = set()
     pixels = {}
     
     cEdges = np.zeros((height,width,3), np.uint8)
     cEdges[:,:] = (255,255,255)
     
-    for i in range(0,height):
-        for j in range(0,width):
-            g = Gx[i,j][0]**2 + Gy[i,j][0]**2
-            pixels[(i,j)] = (Gx[i,j][0], Gy[i,j][1])
+    for i in range(1,height-1):
+        for j in range(1,width-1):
+            Gx = -int(img[i-1,j+1][0]) + int(img[i+1,j+1][0]) + -2*int(img[i-1,j][0]) + 2*int(img[i+1,j][0]) + -int(img[i-1,j-1][0]) + int(img[i+1,j-1][0])
+            Gy = int(img[i-1,j+1][0]) + 2*int(img[i,j+1][0]) + int(img[i+1,j+1][0]) + -int(img[i-1,j-1][0]) + -2*int(img[i,j-1][0]) + -int(img[i+1,j-1][0])
+            g = Gx**2 + Gy**2
+            pixels[(i,j)] = (Gx, Gy)
             if g > T:
-                edges.append((i,j))
-    
+                edges.add((i,j))
+            elif t < g < T:
+                weak.add((i,j))
+    print(len(weak))
+    count = 0
+    for i in weak:
+        count+=1
+        
+        edges |= dfs(edges, i)
+        if count/len(weak)*100 % 10 < 0.001: print("{}% - {}s".format(count/len(weak)*100, time.clock()-tick)) 
+                
     for i in edges:
-        #neighbors = findNeighbors(i[0],i[1]])
-        angle = roundAngle(np.arctan2(pixels[i][1], pixels[i][0])* 180 / np.pi) 
+        angle = roundAngle(np.arctan2(pixels[i][1], pixels[i][0]) * 180 / np.pi) 
         
         x = i[0]
         y = i[1]
         
-        if 0 < x < height-1 and 0 < y < width-1: 
+        if 1 < x < height-2 and 1 < y < width-2: 
         
             if angle == 0:
                 x1,y1 = x+1,y
@@ -215,14 +209,39 @@ def canny2(img):
             if g == max(g, g1, g2):
                 cEdges[x,y] = 0
 
+    print("Canny II - {}s".format(time.clock()-tick))
     return cEdges
 
 cv2.imshow('Original', img)
 
 grayed = toGray(img)
 blurred = blur(grayed)
+sobel = edges(blurred.copy())
+can1 = canny1(blurred.copy())
+can2 = canny2(blurred.copy())
 
-pics = {"g":grayed, "b": blurred, "e":edges(blurred.copy())}#, "c1":canny1(blurred.copy())}
+def save():
+    pimg = img.copy()
+    psobel = sobel.copy()
+    pcan1 = can1.copy()
+    pcan2 = can2.copy()
+    pics = [pimg, psobel, pcan1, pcan2]
+    c = 0
+    for pic in pics:
+        c += 1
+        for i in range(height):
+            pic[i, 0] = 0
+            pic[i, width-1] = 0
+        for j in range(width):
+            pic[0, j] = 0
+            pic[height-1, j] = 0
+        name = "{}{}".format(c, imgSpec[-4:])
+        #print(name)
+        cv2.imwrite(name,pic)
+
+save()
+
+pics = {"g":grayed, "b": blurred, "e": sobel, "c1": can1, "c2": can2}
 
 while True:
     key = cv2.waitKey(0)
@@ -246,10 +265,10 @@ while True:
     if key == ord('c'):
         cv2.destroyAllWindows()
         cv2.imshow('Canny 1', pics["c1"])
-    # if key == ord('c'):
-    #     cv2.destroyAllWindows()
-    #     cv2.imshow('Canny 2', pics["c2"])
     if key == ord('x'):
         cv2.destroyAllWindows()
-        cv2.imshow('wut', cv2.Canny(img,100,200))
+        cv2.imshow('Canny 2', pics["c2"])
+    # if key == ord('v'):
+    #     cv2.destroyAllWindows()
+    #     cv2.imshow('wut', cv2.Canny(img,100,200))
 

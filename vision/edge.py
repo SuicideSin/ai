@@ -109,11 +109,11 @@ def canny1(img):
                 x1,y1 = x+1,y
                 x2,y2 = x-1,y
                 
-            if angle == -45:
+            if angle == 45:
                 x1,y1 = x+1,y+1
                 x2,y2 = x-1,y-1
             
-            if angle == 45:
+            if angle == -45:
                 x1,y1 = x+1,y-1
                 x2,y2 = x-1,y+1
                 
@@ -152,9 +152,12 @@ def canny2(img):
                 edges.add((i,j))
             elif t < g < T:
                 weak.add((i,j))
-    
-    strong = set()
-    
+    for i in weak:
+        neighbors = findNeighbors(i)
+        for n in neighbors:
+            if n in edges:
+                edges.add(i)
+                
     for i in edges:
         angle = roundAngle(np.arctan2(pixels[i][1], pixels[i][0]) * 180 / np.pi) 
         
@@ -167,11 +170,11 @@ def canny2(img):
                 x1,y1 = x+1,y
                 x2,y2 = x-1,y
                 
-            if angle == -45:
+            if angle == 45:
                 x1,y1 = x+1,y+1
                 x2,y2 = x-1,y-1
             
-            if angle == 45:
+            if angle == -45:
                 x1,y1 = x+1,y-1
                 x2,y2 = x-1,y+1
                 
@@ -185,13 +188,6 @@ def canny2(img):
             
             if g == max(g, g1, g2):
                 cEdges[x,y] = 0
-                strong.add(i)
-                
-    for i in weak:
-        neighbors = findNeighbors(i)
-        for n in neighbors:
-            if n in edges:
-                cEdges[x,y] = 0 
 
     return cEdges
 
@@ -199,8 +195,32 @@ cv2.imshow('Original', img)
 
 grayed = toGray(img)
 blurred = blur(grayed)
+sobel = edges(blurred.copy())
+can1 = canny1(blurred.copy())
+can2 = canny2(blurred.copy())
 
-pics = {"g":grayed, "b": blurred, "e":edges(blurred.copy()), "c1":canny1(blurred.copy()), "c2":canny2(blurred.copy())}
+def save():
+    pimg = img.copy()
+    psobel = sobel.copy()
+    pcan1 = can1.copy()
+    pcan2 = can2.copy()
+    pics = [pimg, psobel, pcan1, pcan2]
+    c = 0
+    for pic in pics:
+        c += 1
+        for i in range(height):
+            pic[i, 0] = 0
+            pic[i, width-1] = 0
+        for j in range(width):
+            pic[0, j] = 0
+            pic[height-1, j] = 0
+        name = "{}{}".format(c, imgSpec[-4:])
+        #print(name)
+        cv2.imwrite(name,pic)
+
+save()
+
+pics = {"g":grayed, "b": blurred, "e": sobel, "c1": can1, "c2": can2}
 
 while True:
     key = cv2.waitKey(0)
@@ -224,10 +244,10 @@ while True:
     if key == ord('c'):
         cv2.destroyAllWindows()
         cv2.imshow('Canny 1', pics["c1"])
-    if key == ord('v'):
+    if key == ord('x'):
         cv2.destroyAllWindows()
         cv2.imshow('Canny 2', pics["c2"])
-    if key == ord('x'):
+    if key == ord('v'):
         cv2.destroyAllWindows()
         cv2.imshow('wut', cv2.Canny(img,100,200))
 
