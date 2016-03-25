@@ -78,37 +78,33 @@ for r in range(1,height-1):
 
 print("Height: {}\nWidth: {}\nEdge Pixels: {}".format(height,width,len(edges)))
 
-hough = np.zeros((int(math.sqrt(height**2+width**2)),900,3), np.uint8)
-hough[:,:] = 255
+hyp = math.sqrt(height**2+width**2)
+hough = np.zeros((180,hyp,3), np.uint8)
+hough[:,:] = 0
 
-intersects = {(r, c): 0 for r in range(height) for c in range(width)}
-
-
-lines = {}
+accumulator = {}
 for e in edges:
-    i,j = e[0], e[1]
-    r,c = i,j
-    
-    ø = 0
-    while ø <= 180:
+    r,c = e[0], e[1]
+
+    for ø in range(-90, 90):
         rad = ø*math.pi/180
-        pair = (c*np.cos(rad) + r*np.sin(rad), rad)
-        hough[int(pair[0]),int(pair[1]*180/math.pi)] -= 1
-        if pair in lines:
-            lines[pair] += 1
-        else:
-            lines[pair] = 1
-    
-        #slope = -math.tan(rad+math.pi/2)
+        pair = (abs(c*np.cos(rad) - r*np.sin(rad)), ø)
+        hough[ø+90, pair[0]] += 1
+        if pair not in accumulator:
+            accumulator[pair] = 1
+        accumulator[pair] += 1
+
+T = int(sys.argv[2]) if len(sys.argv) > 2 else 70
+lines = {i: accumulator[i] for i in accumulator if accumulator[i] > T}
+
+for i in accumulator:
+    if accumulator[i] > T:
+        print("{}, {} times".format(i, accumulator[i]))
         
-        ø+=.5
-
-
-
-
-print("{}, {} times".format(max(lines, key=lines.get), lines[max(lines, key=lines.get)]))
-del lines[max(lines, key=lines.get)]
-print("{}, {} times".format(max(lines, key=lines.get), lines[max(lines, key=lines.get)]))
+        
+# print("{}, {} times".format(max(lines, key=lines.get), lines[max(lines, key=lines.get)]))
+# del lines[max(lines, key=lines.get)]
+# print("{}, {} times".format(max(lines, key=lines.get), lines[max(lines, key=lines.get)]))
 
 
 cv2.imshow('Hough', hough)
