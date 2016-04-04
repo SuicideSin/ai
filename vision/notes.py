@@ -144,6 +144,8 @@ Good runs:
 
 
 
+./lines.py http://www.publicdomainpictures.net/pictures/80000/nahled/chess-board-and-pieces.jpg 100
+
 
 
 

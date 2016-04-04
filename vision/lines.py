@@ -86,21 +86,52 @@ accumulator = {}
 for e in edges:
     r,c = e[0], e[1]
 
-    for ø in range(-90, 90):
-        rad = ø*math.pi/180
-        pair = (abs(c*np.cos(rad) - r*np.sin(rad)), ø)
-        hough[ø+90, pair[0]] += 1
+    for i in range(-90, 90):
+        rad = i*math.pi/180
+        pair = (round(c*math.cos(rad) + r*math.sin(rad)), i)
+        hough[i+90, abs(pair[0])] += 1
         if pair not in accumulator:
-            accumulator[pair] = 1
+            accumulator[pair] = 0
         accumulator[pair] += 1
 
 T = int(sys.argv[2]) if len(sys.argv) > 2 else 70
-lines = {i: accumulator[i] for i in accumulator if accumulator[i] > T}
+lineas = {i: accumulator[i] for i in accumulator if accumulator[i] > T}
 
-for i in accumulator:
-    if accumulator[i] > T:
-        print("{}, {} times".format(i, accumulator[i]))
-        
+lines = img.copy()
+
+for i in lineas:
+    print("{},\n\t\t\t\t{} times".format(i, lineas[i]))
+    
+    rad = i[1]*math.pi/180
+    # p = i[0]*math.cos(rad)
+    # q = i[0]*math.sin(rad)
+    # if math.tan(rad) != 0:
+    #     slope = -1/math.tan(rad)
+    #
+    #     r,c = p, q
+    #     while 0 < c < width and 0 < r < height:
+    #         lines[int(r), c] = (0, 255, 0)
+    #         c+=1
+    #         r+=slope
+    #     r,c = p,q
+    #     while 0 < c < width and 0 < r < height:
+    #         lines[int(r), c] = (0, 255, 0)
+    #         c-=1
+    #         r-=slope
+    
+
+    for c in range(width):
+        if int(i[1]) == 0:
+            pass
+            #cv2.line(lines, (int(i[0]),0), (int(i[0]),height-1), (0,255,0), 1)
+        else:
+            r = (-math.cos(rad)/math.sin(rad))*c + i[0]/math.sin(rad)
+        if 0 <= r < height:
+            lines[int(r), int(c)] = (0, 255, 0)
+    for r in range(height):
+        c = (r - i[0]/np.sin(rad))/(-np.cos(rad)/np.sin(rad))
+        if 0 <= c < width:
+            lines[int(r), int(c)] = (0, 255, 0)
         
 # print("{}, {} times".format(max(lines, key=lines.get), lines[max(lines, key=lines.get)]))
 # del lines[max(lines, key=lines.get)]
@@ -128,3 +159,6 @@ while True:
     if key == ord('h'):
         cv2.destroyAllWindows()
         cv2.imshow('Hough', hough)
+    if key == ord('l'):
+        cv2.destroyAllWindows()
+        cv2.imshow('Lines', lines)
