@@ -22,4 +22,8 @@ Optimization strategies:
 2. Given a command line input, n, find a solution to the n-queens problem by taking an arbitrary permutation string and using hill climbing where you check all possible swaps for improvement (Print out permutation string and board)
 
 n*(n-1)/2
+
+4132 -> 1432 3142 2134 | 4312 4231 | 4123
+
+51243 -> 15243 21543 41253 31245 | 52143 54213 53241 | 51423 51234 | 51342 
 '''

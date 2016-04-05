@@ -3,36 +3,42 @@ import sys, time, random
 from itertools import permutations
 
 n = int(sys.argv[1]) if len(sys.argv) > 1 else 8
+queens = sys.argv[2] if len(sys.argv) > 2 else ''.join(random.sample([str(i) for i in range(1, n+1)], n))
 
-perms = {''.join(p) for p in permutations(''.join(str(i) for i in range(1, n+1)))}
-queens = sys.argv[2] if len(sys.argv) > 2 else perms.pop()
+def conflicts(queens): return len([True for i in range(1, n+1) for j in range(1, n+1) if i != j and abs(int(queens[i-1])-int(queens[j-1])) == abs(i-j)])
 
-def conflicts(queens):
-    return len([1 for i in range(1, n+1) for j in range(1, n+1) if i != j and abs(int(queens[i-1])-int(queens[j-1])) == abs(i-j)])
+def display(queens): print ("\n".join('| ' + '. ' * (int(i)-1) + '\033[1;32mX\033[0m ' + '. ' * (n-int(i)) + '|' for i in queens) + "\n" + " " + "-"*(2*n+1) + " ")
 
-def display(queens):
-    print ("\n".join('. ' * (int(i)-1) + '\033[1;32mX\033[0m ' + '. ' * (n-int(i)) for i in queens) + "\n" + "-"*(2*n-1) + "\n")
-
-def solve(queens, perms):
-    perm = queens
-    while conflicts(perm) > 0:
-        perm = perms.pop()
-    return perm
-
-def solveAll(queens, perms):
-    s = set()
-    perm = queens
-    while perms:
+def solve(queens):
+    perms = {''.join(p) for p in permutations(''.join(str(i) for i in range(1, n+1)))}
+    for perm in perms:
         if conflicts(perm) == 0:
-            s.add(perm)
-        perm = perms.pop()
-    return s
+            return perm
+
+def allSwaps(queens):
+    swaps = {''.join([queens[:i], queens[j], queens[i+1:j], queens[i], queens[j+1:]]) for i in range(n) for j in range(n)}
+    swaps = {i for i in swaps if len(i) == n}
+    assert len(swaps) == n*(n-1)/2
+    return swaps
+
+def hillClimb(queens):
+    while conflicts(queens) > 0:
+        conflictDict = {i: conflicts(i) for i in allSwaps(queens)}
+        minConflict = min(conflictDict, key=conflictDict.get)
+        queens = minConflict if conflictDict[minConflict] < conflicts(queens) else ''.join(random.sample(queens, n))
+    return queens
+
+def solveAll(queens):
+    perms = {''.join(p) for p in permutations(''.join(str(i) for i in range(1, n+1)))}
+    return {perm for perm in perms if conflicts(perm) == 0}
     
-# print(queens)
-# display(queens)
 start = time.clock()
-solns = solveAll(queens, perms)
+#solns = solveAll(queens)
+#soln = solve(queens)
+soln = hillClimb(queens)
 end = time.clock()
-for soln in solns:
-    display(soln)
-print("{} Solutions found in {} seconds.".format(len(solns), end-start))
+# for soln in solns: display(soln)
+# print("{} Solutions found for a {} by {} board in {} seconds.".format(len(solns), n, n,  end-start))
+print(soln )
+display(soln)
+print("Solution found for a {} by {} board in {} seconds.".format(n, n,  end-start))
