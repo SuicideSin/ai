@@ -26,4 +26,15 @@ n*(n-1)/2
 4132 -> 1432 3142 2134 | 4312 4231 | 4123
 
 51243 -> 15243 21543 41253 31245 | 52143 54213 53241 | 51423 51234 | 51342 
+
+A. Investigate how long it takes to solve the n-queens problem 
+    1. If you only make a swap when it improves your position
+        a. Graph the number of swaps till you find a solution against n 
+    
+        2. Also graph the number of shuffles
+
+        3. What is the percent of times that there is a lateral swap possibility just prior              to a shuffle (as a function of n)? A lateral swap is a swap that makes the number             of conflicts stay the same
+
+B. Implement a lateral shuffle approach that improves on A
+    1. graph against n
 '''
