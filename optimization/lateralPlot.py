@@ -10,27 +10,46 @@ def allSwaps(queens, n): return [list(i) for i in {tuple(queens[:i] + [queens[j]
 def hillClimb(queens, n):
     swaps = 0
     shuffles = 0
-    while conflicts(queens, n) > 0:
+    laterals = 0
+    visited = set()
+    c = conflicts(queens, n)
+    while c > 0:
         conflictDict = {tuple(i): conflicts(i, n) for i in allSwaps(queens, n)}
         #assert len(conflictDict) == n*(n-1)/2
         minConflict = min(conflictDict, key=conflictDict.get)
-        if conflictDict[minConflict] < conflicts(queens, n):
+        if conflictDict[minConflict] < c:
             queens = list(minConflict)
             swaps += 1
+        elif conflictDict[minConflict] == c and minConflict not in visited:
+            queens = list(minConflict)
+            visited.add(minConflict)
+            laterals += 1
         else:
             queens = random.sample(queens, n)
             shuffles += 1
-    return (queens, swaps, shuffles)
+        c = conflicts(queens, n)
+    return (queens, swaps, shuffles, laterals)
 
 sw = open('swaps.txt', 'w+')
 sh = open('shuffles.txt', 'w+')
+lat = open('laterals.txt', 'w+')
+
+t = 100
 
 for n in range(4, 51):
-    queens = random.sample(range(1, n+1), n)
+    totalSwaps = 0
+    totalShuffles = 0
+    totalLaterals = 0
     start = time.clock()
-    soln, swaps, shuffles = hillClimb(queens, n)
+    for i in range(t):
+        queens = random.sample(range(1, n+1), n)
+        soln, swaps, shuffles, laterals = hillClimb(queens, n)
+        totalSwaps += swaps
+        totalShuffles += shuffles
+        totalLaterals += laterals
     end = time.clock()
-    sw.write("{}\t{}\n".format(n, swaps))
-    sh.write("{}\t{}\n".format(n, shuffles))
+    sw.write("{}\t{}\n".format(n, swaps/t))
+    sh.write("{}\t{}\n".format(n, shuffles/t))
+    lat.write("{}\t{}\n".format(n, laterals))
     #print(soln)
-    print("Solution found for a {} by {} board in {} seconds.".format(n, n,  end-start))
+    print("{} trials of {} by {} finished in {} seconds.".format(t, n, n,  end-start))
