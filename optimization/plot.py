@@ -30,11 +30,11 @@ def hillClimb(queens, n):
         total += 1
     return (queens, swaps, shuffles, laterals, total)
 
-sw = open('swaps.txt', 'w+')
-sh = open('shuffles.txt', 'w+')
-lat = open('laterals.txt', 'w+')
+sw = open('plot/swaps.txt', 'w+')
+sh = open('plot/shuffles.txt', 'w+')
+lat = open('plot/laterals.txt', 'w+')
 
-t = 1
+t = 100
 
 for n in range(4, 51):
     totalSwaps = 0
