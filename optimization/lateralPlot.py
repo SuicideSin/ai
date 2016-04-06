@@ -22,6 +22,7 @@ def hillClimb(queens, n):
         elif conflictDict[minConflict] == c and minConflict not in visited:
             queens = list(minConflict)
             visited.add(minConflict)
+            swaps += 1
         else:
             queens = random.sample(queens, n)
             shuffles += 1
