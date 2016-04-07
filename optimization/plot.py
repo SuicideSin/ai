@@ -52,6 +52,6 @@ for n in range(4, 51):
     end = time.clock()
     sw.write("{}\t{}\n".format(n, totalSwaps/t))
     sh.write("{}\t{}\n".format(n, totalShuffles/t))
-    lat.write("{}\t{}\n".format(n, totalLaterals/totalTotal))
+    lat.write("{}\t{}\n".format(n, totalLaterals/totalTotal*100))
     #print(soln)
     print("{} trials of {} by {} finished in {} seconds.".format(t, n, n,  end-start))
