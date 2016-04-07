@@ -5,11 +5,11 @@ set xlabel "n"
 set grid ytics
 
 set output "swaps.png"
-set title "Swaps (lateral algorithm)"
+set title "Swaps (lateral algorithm), 100 trials"
 set ylabel "Number of swaps"
 plot "swaps.txt" u 1:2 w l notitle
 
 set output "shuffles.png"
-set title "Shuffles (lateral algorithm)"
+set title "Shuffles (lateral algorithm), 100 trials"
 set ylabel "Number of shuffles"
 plot "shuffles.txt" u 1:2 w l notitle
