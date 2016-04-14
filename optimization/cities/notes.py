@@ -37,4 +37,14 @@ A. Investigate how long it takes to solve the n-queens problem
 
 B. Implement a lateral shuffle approach that improves on A
     1. graph against n
+    
+    
+    
+    
+38 cities 
+Read in each city from file, make a dictionary
+create list
+e.g. [1, 12, 27, ... 6, 32, 25]
+find total distance traveled
+
 '''

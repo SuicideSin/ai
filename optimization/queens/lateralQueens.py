@@ -6,7 +6,7 @@ queens = [int(sys.argv[i]) for i in range(2, n+2)] if len(sys.argv) == n+2 else 
 
 def conflicts(queens, n): return len([True for i in range(1, n+1) for j in range(1, n+1) if i != j and abs(queens[i-1]-queens[j-1]) == abs(i-j)])
 
-def display(queens, n): print ("\n".join('| ' + '. ' * (int(i)-1) + '\033[1;32mX\033[0m ' + '. ' * (n-int(i)) + '|' for i in queens) + "\n" + " " + "-"*(2*n+1) + " ")
+def display(queens, n): print ("\n".join('| ' + '. ' * (i-1) + '\033[1;32mX\033[0m ' + '. ' * (n-i) + '|' for i in queens) + "\n" + " " + "-"*(2*n+1) + " ")
 
 def allSwaps(queens, n): return {i for i in {tuple(queens[:i] + [queens[j]] + queens[i+1:j] + [queens[i]] + queens[j+1:]) for i in range(n) for j in range(n)} if len(i) == n}
 
