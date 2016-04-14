@@ -46,6 +46,7 @@ print("\033[1;32mRandom Path\033[0m:")
 print(path)
 print("Total distance: {}".format(cost(path, n)))
 # Hill climbing
-if numCities == 38: results(hillClimb, "Local Min using swapping", (path, n))
+if numCities == 38:
+    hc = results(hillClimb, "Local Min using swapping", (path, n))
 # Greedy
-results(greedier, "Greedy Algorithm", (n, [random.randint(1, n)], 5))
+g = results(greedier, "Greedy Algorithm", (n, [random.randint(1, n)], 10))
