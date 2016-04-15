@@ -28,12 +28,20 @@ def greedier(n, path, t):
     dists = {i: cost(i, n) for i in {tuple(greedy(n, [random.randint(1, n)])) for j in range(t)}}
     return min(dists, key=dists.get)
 
-def results(func, name, args):
+def results(n, func, name, args):
     tick = time.clock()
-    s = func(*args)
+    s = form(n, func(*args))
+    assert len(s) == len(set(s))
     tock = time.clock()
     print("{}\n\033[1;32m{}\033[0m:\n{}\nTotal distance: {}\nFound in {} seconds.".format("-"*cols, name, s, cost(s, n), tock-tick))
     return s
+
+def form(n, path):
+    i = path.index(1)
+    path = list(path[i:] + path[:i])
+    if path[1] > path [-1]:
+        path = [path[0]] + [path[i] for i in range(n-1, 0, -1)]
+    return path
 
 numCities = 38 if len(sys.argv) > 1 and sys.argv[1] == '38' else 734 if len(sys.argv) > 1 and sys.argv[1] == '734' else 38
 
@@ -46,6 +54,15 @@ print("\033[1;32mRandom Path\033[0m:")
 print(path)
 print("Total distance: {}".format(cost(path, n)))
 # Hill climbing
-if numCities == 38: results(hillClimb, "Local Min using swapping", (path, n))
+if numCities == 38:
+    hc = results(n, hillClimb, "Local Min using swapping", (path, n))
+    f = open('hcdata.txt', 'w+')
+    for i in hc:
+        f.write("{}\t{}\n".format(round(cities[i][0]), (cities[i][1])))
+    f.write("{}\t{}\n".format(round(cities[1][0]), (cities[1][1])))
 # Greedy
-results(greedier, "Greedy Algorithm", (n, [random.randint(1, n)], 5))
+g = results(n, greedier, "Greedy Algorithm (Best of 5 runs)", (n, [random.randint(1, n)], 10))
+f = open('gdata.txt', 'w+')
+for i in g:
+    f.write("{}\t{}\n".format((cities[i][0]), (cities[i][1])))
+f.write("{}\t{}\n".format((cities[1][0]), (cities[1][1])))

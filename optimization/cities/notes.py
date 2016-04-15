@@ -47,4 +47,8 @@ create list
 e.g. [1, 12, 27, ... 6, 32, 25]
 find total distance traveled
 
+
+ASSIGNMENTS:
+
+
 '''
