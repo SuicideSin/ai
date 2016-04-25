@@ -8,13 +8,16 @@ def cost(path, n): return sum([dist(cities[path[i]], cities[path[i+1]]) for i in
 
 def allSwaps(path, n): return {i for i in {tuple(path[:i] + [path[j]] + path[i+1:j] + [path[i]] + path[j+1:]) for i in range(n) for j in range(n)} if len(i) == n}
 
+def allReversals(path, n): return {i for i in {tuple(path[:i] + path[i:j+1][::-1] + path[j+1:]) for i in range(n) for j in range(n)} if len(i) == n}
+
 def hillClimb(path, n):
     visited = set()
     c, p = cost(path, n), float("inf")
     while c < p:
-        costDict = {i: cost(i, n) for i in allSwaps(path, n) if i not in visited}
+        costDict = {i: cost(i, n) for i in allReversals(path, n) if i not in visited}
         path = list(min(costDict, key=costDict.get))
         p, c = c, cost(path, n)
+        print(path)
     return path
     
 def greedy(n, path):
@@ -53,16 +56,18 @@ path = random.sample([i for i in range(1, n+1)], n)
 print("\033[1;32mRandom Path\033[0m:")
 print(path)
 print("Total distance: {}".format(cost(path, n)))
-# Hill climbing
-if numCities == 38:
-    hc = results(n, hillClimb, "Local Min using swapping", (path, n))
-    f = open('hcdata.txt', 'w+')
-    for i in hc:
-        f.write("{}\t{}\n".format(round(cities[i][0]), (cities[i][1])))
-    f.write("{}\t{}\n".format(round(cities[1][0]), (cities[1][1])))
+
 # Greedy
-g = results(n, greedier, "Greedy Algorithm (Best of 5 runs)", (n, [random.randint(1, n)], 10))
+g = results(n, greedier, "Greedy Algorithm (Best of 5 runs)", (n, [random.randint(1, n)], 2))
 f = open('gdata.txt', 'w+')
 for i in g:
     f.write("{}\t{}\n".format((cities[i][0]), (cities[i][1])))
 f.write("{}\t{}\n".format((cities[1][0]), (cities[1][1])))
+
+# Hill climbing
+
+hc = results(n, hillClimb, "Local Min using swapping", (g, n))
+f = open('hcdata.txt', 'w+')
+for i in hc:
+    f.write("{}\t{}\n".format(round(cities[i][0]), (cities[i][1])))
+f.write("{}\t{}\n".format(round(cities[1][0]), (cities[1][1])))
