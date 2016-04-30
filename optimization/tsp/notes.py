@@ -82,4 +82,51 @@ Consider all pairs of positions, reverse the strings, find total distance, and c
 HINT: You don't have to recompute the WHOLE distance. You only have to compute the distance of the changed portions of the path.
 
 
+
+|-----q-d-----b-y-----| 
+|        \   /        |
+|          /          |
+|        /   \        |
+|_____x-a-----c-o-----|
+
+incrDist = d(a,c) + d(b,d) - d(a,b) - d(c,d)
+
+threshold = .001
+
+improvementNoted = True
+while improvementNoted:
+    improvementNoted = False
+    for edge1 in range ( ):
+        for edge2 in range( edge1+2,-):
+            incrementalDist =  d(a,c) + d(b,d) - d(a,b) - d(c,d)
+            if incrementalDist > -threshold: continue
+            update path
+            update distance
+            improvementNoted = True
+        if improvementNoted == True: break
+
+more improvement:
+-improve distance measurement
+-
+
 '''
+
+def allPerms(perm):
+    if len(perm) == 0: return [[]]
+    if len(perm) == 1: return [perm]                #optional
+    if len(perm) == 2: return [perm, perm[::-1]]    #optional
+    answer = []
+    for i in range(len(perm)):
+        subPerm = allPerms(perm[:i] + perm[i+1:])
+        subPerm = [lst + [perm[i]] for lst in subPerm]
+        answer += subPerm
+    return answer
+
+def findAdjSwapPerms(n):
+    #finds positions for adjacent swaps that will generate all n! permutations of [0...n-1]
+    if n == 1: return []
+    if n == 2: return [0, 0] #optional
+    fs = findAdjSwapPerms(n-1)
+    pfx = [[i for i in range(n-1)], [i for i in range(n-1)][::-1]]
+    fsr = [pfx[i%2] + [fs[i] + (i%2)] for i in range(len(fs))]
+    return [elem for frssub in fsr for slem in fsrsub]

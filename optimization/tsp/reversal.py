@@ -1,15 +1,17 @@
-#!/usr/local/bin/python3
+#!/usr/local/bin/pypy3
 import math, random, time, sys, os
 cols = int(os.popen('stty size', 'r').read().split()[1])
 
 def dist(t1, t2): return math.sqrt((t1[0]-t2[0])**2 + (t1[1]-t2[1])**2)
 
-def cost(path, n): return sum([dist(cities[path[i]], cities[path[i+1]]) for i in range(-1, n-1)])
-
-def linCost(path,n): return sum([dist(cities[path[i]], cities[path[i+1]]) for i in range(0, n-1)])
+# def cost(path, n): return sum([dist(cities[path[i]], cities[path[i+1]]) for i in range(-1, n-1)])
+#
+def linCost(path,n): return sum([cityCosts[path[i]][path[i+1]] for i in range(0, n-1)])
 
 def allReversals(path, n): return {i:j for i,j in {tuple(path[:i] + path[i:j+1][::-1] + path[j+1:]): (i,j) for i in range(n) for j in range(n)}.items() if len(i) == n}
 #MAKE SURE THIS WORKS FOR WHEN i < j
+
+def cost(path, n): return sum([cityCosts[path[i]][path[i+1]] for i in range(-1, n-1)])
 
 def hillClimb(path, n):
     visited = set()
@@ -57,6 +59,8 @@ def form(path, n):
 numCities = 38 if len(sys.argv) > 1 and sys.argv[1] == '38' else 734 if len(sys.argv) > 1 and sys.argv[1] == '734' else 38
 
 cities = {i: j for (i, j) in enumerate((tuple([float(i) for i in line.rstrip('\n').split()])) for line in open('{}cities.txt'.format(numCities), 'r')) if len(j) > 1}
+
+cityCosts = {i: {j: dist(cities[i], cities[j]) for j in cities if j != i} for i in cities}
 
 n = len(cities)
 path = random.sample([i for i in range(1, n+1)], n)

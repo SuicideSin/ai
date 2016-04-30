@@ -4,7 +4,9 @@ cols = int(os.popen('stty size', 'r').read().split()[1])
 
 def dist(t1, t2): return math.sqrt((t1[0]-t2[0])**2 + (t1[1]-t2[1])**2)
 
-def cost(path, n): return sum([dist(cities[path[i]], cities[path[i+1]]) for i in range(-1, n-1)])
+#def cost(path, n): return sum([dist(cities[path[i]], cities[path[i+1]]) for i in range(-1, n-1)])
+
+def cost(path, n): return sum([cityCosts[path[i]][path[i+1]] for i in range(-1, n-1)])
 
 def allSwaps(path, n): return {i for i in {tuple(path[:i] + [path[j]] + path[i+1:j] + [path[i]] + path[j+1:]) for i in range(n) for j in range(n)} if len(i) == n}
 
@@ -17,7 +19,7 @@ def hillClimb(path, n):
         costDict = {i: cost(i, n) for i in allReversals(path, n) if i not in visited}
         path = list(min(costDict, key=costDict.get))
         p, c = c, cost(path, n)
-        print(path)
+        #print(path)
     return path
     
 def greedy(n, path):
@@ -49,6 +51,9 @@ def form(n, path):
 numCities = 38 if len(sys.argv) > 1 and sys.argv[1] == '38' else 734 if len(sys.argv) > 1 and sys.argv[1] == '734' else 38
 
 cities = {i: j for (i, j) in enumerate((tuple([float(i) for i in line.rstrip('\n').split()])) for line in open('{}cities.txt'.format(numCities), 'r')) if len(j) > 1}
+
+cityCosts = {i: {j: dist(cities[i], cities[j]) for j in cities if j != i} for i in cities}
+
 
 n = len(cities)
 path = random.sample([i for i in range(1, n+1)], n)
