@@ -19,15 +19,16 @@ def hillClimb(path, n):
         costDict = {i: cost(i, n) for i in allReversals(path, n) if i not in visited}
         path = list(min(costDict, key=costDict.get))
         p, c = c, cost(path, n)
-        #print(path)
+        print(path)
+        print(c)
     return path
-    
+
 def greedy(n, path):
     dists = {i: dist(cities[path[-1]], cities[i]) for i in range(1,n+1) if i not in path and i != path[-1]}
     if dists:
         path.append(min(dists, key=dists.get))
         greedy(n, path)
-    return path    
+    return path
 
 def greedier(n, path, t):
     dists = {i: cost(i, n) for i in {tuple(greedy(n, [random.randint(1, n)])) for j in range(t)}}

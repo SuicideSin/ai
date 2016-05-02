@@ -26,18 +26,18 @@ def hillClimb(path, n):
         #print(path)
         visited.add(tuple(path))
     return path
-    
+
 def greedy(path, n):
     dists = {i: dist(cities[path[-1]], cities[i]) for i in range(1,n+1) if i not in path and i != path[-1]}
     if dists:
         path.append(min(dists, key=dists.get))
         greedy(path, n)
-    return path    
+    return path
 
 def greedier(path, n, t):
     dists = {i: cost(i, n) for i in {tuple(greedy([random.randint(1, n)], n)) for j in range(t)}}
     return min(dists, key=dists.get)
-    
+
 def greedyReversal(path, n):
     return hillClimb(form(greedier(path, n, 10), n), n)
 
