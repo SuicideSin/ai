@@ -130,3 +130,19 @@ def findAdjSwapPerms(n):
     pfx = [[i for i in range(n-1)], [i for i in range(n-1)][::-1]]
     fsr = [pfx[i%2] + [fs[i] + (i%2)] for i in range(len(fs))]
     return [elem for frssub in fsr for slem in fsrsub]
+    
+'''
+Genetic Algorithms:
+    We will use GA for NQueens
+    
+    Example:
+    Two parents:
+    1: [0 2 7 4 5 1 6 3]
+    2: [1 2 3 7 6 5 0 4]
+    
+    How to breed?
+    Take the parents and make a pivot point.
+    
+    Offspring: [0 2 7 4 5 5 0 4] - Notice how this offspring is pretty unfit
+    
+'''
