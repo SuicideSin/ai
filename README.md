@@ -6,3 +6,7 @@ Covered topics such as:
 - Hill climbing optimization
 - Genetic algorithms
 - Constraint satisfaction problems
+- Computer vision
+ - Canny edge detection
+ - Hough transform
+- Neural networks
