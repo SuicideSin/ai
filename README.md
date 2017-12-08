@@ -7,6 +7,6 @@ Covered topics such as:
 - Genetic algorithms
 - Constraint satisfaction problems
 - Computer vision
- - Canny edge detection
- - Hough transform
+    - Canny edge detection
+    - Hough transform
 - Neural networks
